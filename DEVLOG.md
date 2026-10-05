@@ -1,39 +1,38 @@
-# EMP — Development Log
+# EMP Dev Log
 
-Day-by-day notes on what was built and why.
-This is a personal record of the project's progress.
+just keeping track of what i did and why, useful for the report too
 
 ---
 
-## Day 1 — 05 Oct 2026
+## 05 Oct 2026
 
-**What I set up today:**
-- Created the project folder structure
-- Wrote `config.py` — kept it minimal, just the DB URI and secret key
-- Wrote `models.py` — decided to go with a single `User` table for all three roles
-  (admin, examiner, student) using a `role` column. This is simpler than three
-  separate tables and still gives me the access control I need with just a property check.
-- Added helper methods like `set_password()`, `check_password()`, `is_slot_creation_open()`
-  directly on the model — keeps the route logic clean
-- Wrote `app.py` with an app factory pattern and `seed_admin()` — the admin gets
-  created only once, on first run
-- Set up Flask-Login and registered all four blueprints
-- Built auth routes: login (with role-based redirect), register (student/examiner only),
-  logout
-- Made base template with responsive navbar and flash message area
-- Made login and register templates (register has JS toggle for examiner fields — UI only,
-  not core logic, so allowed per spec)
-- Made placeholder dashboards for all three roles
-- Wrote custom CSS with a navy+amber color theme
+started the project today. set up the basic structure first — app.py, config.py, models.py.
 
-**Design decisions:**
-- Examination status is a proper state machine string. I check it explicitly in
-  `is_slot_creation_open()` and `is_booking_open()` instead of just checking dates.
-  This way the admin has explicit control, and dates are a secondary guard.
-- `available_seats` lives directly on the slot row — decrement on booking,
-  increment on cancel. Simple and fast.
+decided to keep all 3 roles (admin, examiner, student) in one User table with a role column.
+thought about having separate tables but that would mean writing 3 different login flows which
+is unnecessary. role column + property check is cleaner.
 
-**Next up:**
-- Admin: Course CRUD, Examination CRUD, Rubric management, Examiner approval
+wrote all the models: User, Course, Examination, Rubric, Slot, Booking, Evaluation.
+the Examination has 4 date fields to control when examiners can create slots and when students
+can book — these work together with the status field. status is like a state machine,
+dates are a secondary check.
+
+for slots i kept `available_seats` as a real column instead of counting bookings each time.
+makes more sense — just decrement when someone books, increment on cancel.
+
+flask-login handles sessions. put login_required and role decorators on all routes.
+examiners need is_approved=True before they can log in — admin flips that.
+
+admin gets seeded automatically when app starts (only once, checks first).
+
+built login, register, logout and basic dashboards for all 3 roles.
+register page has a small JS toggle to show/hide the department/phone fields for examiners —
+only UI stuff, all real validation is in the route.
+
+base template has navbar with role-based links, flash messages, footer.
+made a custom CSS file — navy and amber color theme (wanted something different from the
+default bootstrap blue).
+
+next: admin CRUD for courses, exams, rubrics, examiner approval
 
 ---

@@ -1,16 +1,3 @@
-"""
-Examination Management Portal (EMP)
-------------------------------------
-IITM BS Data Science — App Dev 1 Project | September 2026 Term
-Built with: Flask + SQLAlchemy + Jinja2 + Bootstrap + SQLite
-
-This is the main application entry point.
-Running this file directly will:
-  1. Create all tables in the SQLite database (if not already present)
-  2. Seed one admin user so you can log in right away
-  3. Start the dev server on http://127.0.0.1:5000
-"""
-
 import os
 from flask import Flask
 from flask_login import LoginManager
@@ -23,13 +10,10 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # make sure the instance folder exists so SQLite can write there
     os.makedirs(os.path.join(app.root_path, 'instance'), exist_ok=True)
 
-    # hook up the database
     db.init_app(app)
 
-    # set up flask-login
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
@@ -38,10 +22,8 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        # flask-login calls this every request to get the current user object
         return User.query.get(int(user_id))
 
-    # register all the route blueprints
     from routes.auth import auth_bp
     from routes.admin import admin_bp
     from routes.examiner import examiner_bp
@@ -52,7 +34,6 @@ def create_app():
     app.register_blueprint(examiner_bp, url_prefix='/examiner')
     app.register_blueprint(student_bp, url_prefix='/student')
 
-    # create all DB tables + seed admin on first run
     with app.app_context():
         db.create_all()
         seed_admin()
@@ -61,15 +42,9 @@ def create_app():
 
 
 def seed_admin():
-    """
-    Creates the default admin account if it doesn't exist yet.
-    This runs every time the app starts, but the check ensures
-    it only actually inserts once.
-    """
+    # only creates admin if not already there
     admin_email = 'admin@emp.iitm.ac.in'
-    existing = User.query.filter_by(email=admin_email).first()
-
-    if not existing:
+    if not User.query.filter_by(email=admin_email).first():
         admin = User(
             name='EMP Administrator',
             email=admin_email,
@@ -77,16 +52,14 @@ def seed_admin():
             is_active=True,
             is_approved=True
         )
-        admin.set_password('Admin@1234')  # change this after first login
+        admin.set_password('Admin@1234')
         db.session.add(admin)
         db.session.commit()
-        print('[EMP] Admin account seeded — email: admin@emp.iitm.ac.in | pass: Admin@1234')
+        print('Admin seeded — login: admin@emp.iitm.ac.in / Admin@1234')
 
 
-# create the app instance at module level so Flask CLI can find it
 app = create_app()
 
 
 if __name__ == '__main__':
-    # debug=True only for development — hot reload + better error pages
     app.run(debug=True, host='127.0.0.1', port=5000)

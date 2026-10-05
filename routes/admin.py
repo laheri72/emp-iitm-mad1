@@ -1,15 +1,12 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 from functools import wraps
-from flask import redirect, url_for, flash
-from models import db, User, Course, Examination, ExaminationSlot, Booking
+from models import User, Course, Examination, ExaminationSlot, Booking
 
 admin_bp = Blueprint('admin', __name__)
 
 
-# ── access control decorator ──────────────────────────────────────────────────
 def admin_required(f):
-    """Makes sure only admins can reach a route. Redirects others away."""
     @wraps(f)
     def decorated(*args, **kwargs):
         if not current_user.is_authenticated or not current_user.is_admin:
@@ -19,12 +16,10 @@ def admin_required(f):
     return decorated
 
 
-# ── dashboard ─────────────────────────────────────────────────────────────────
 @admin_bp.route('/dashboard')
 @login_required
 @admin_required
 def dashboard():
-    # aggregate counts for the summary cards on the dashboard
     stats = {
         'total_courses': Course.query.count(),
         'total_exams': Examination.query.count(),
