@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard — EMP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="fw-bold mb-0">Admin Dashboard</h4>
+    <small class="text-muted">Overview of the Examination Management Portal</small>
+  </div>
+  <span class="badge bg-danger py-2 px-3">Admin</span>
+</div>
+
+<!-- Summary cards row -->
+<div class="row g-3 mb-4">
+
+  <div class="col-md-4 col-lg-2">
+    <div class="card stat-card border-0 shadow-sm h-100">
+      <div class="card-body text-center">
+        <i class="bi bi-book stat-icon text-primary"></i>
+        <div class="stat-number">{{ stats.total_courses }}</div>
+        <div class="stat-label">Courses</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4 col-lg-2">
+    <div class="card stat-card border-0 shadow-sm h-100">
+      <div class="card-body text-center">
+        <i class="bi bi-clipboard-check stat-icon text-success"></i>
+        <div class="stat-number">{{ stats.total_exams }}</div>
+        <div class="stat-label">Examinations</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4 col-lg-2">
+    <div class="card stat-card border-0 shadow-sm h-100">
+      <div class="card-body text-center">
+        <i class="bi bi-person-badge stat-icon text-warning"></i>
+        <div class="stat-number">{{ stats.total_examiners }}</div>
+        <div class="stat-label">Examiners</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4 col-lg-2">
+    <div class="card stat-card border-0 shadow-sm h-100">
+      <div class="card-body text-center">
+        <i class="bi bi-people stat-icon text-info"></i>
+        <div class="stat-number">{{ stats.total_students }}</div>
+        <div class="stat-label">Students</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4 col-lg-2">
+    <div class="card stat-card border-0 shadow-sm h-100">
+      <div class="card-body text-center">
+        <i class="bi bi-calendar-event stat-icon text-secondary"></i>
+        <div class="stat-number">{{ stats.total_slots }}</div>
+        <div class="stat-label">Slots</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4 col-lg-2">
+    <div class="card stat-card border-0 shadow-sm h-100">
+      <div class="card-body text-center">
+        <i class="bi bi-bookmark-check stat-icon text-danger"></i>
+        <div class="stat-number">{{ stats.total_bookings }}</div>
+        <div class="stat-label">Bookings</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Pending approvals alert -->
+{% if stats.pending_examiners > 0 %}
+<div class="alert alert-warning d-flex align-items-center" role="alert">
+  <i class="bi bi-exclamation-triangle-fill me-2"></i>
+  <div>
+    <strong>{{ stats.pending_examiners }} examiner(s)</strong> are waiting for approval.
+    <!-- link to examiner approval page — coming in Phase 2 -->
+    <a href="#" class="alert-link ms-1">Review now</a>
+  </div>
+</div>
+{% endif %}
+
+<!-- Quick action tiles -->
+<h6 class="fw-semibold mt-4 mb-3 text-muted text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">
+  Quick Actions
+</h6>
+<div class="row g-3">
+  <div class="col-md-3">
+    <a href="#" class="card emp-action-card border-0 shadow-sm text-decoration-none">
+      <div class="card-body d-flex align-items-center gap-3">
+        <i class="bi bi-book fs-4 text-primary"></i>
+        <span class="fw-semibold">Manage Courses</span>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-3">
+    <a href="#" class="card emp-action-card border-0 shadow-sm text-decoration-none">
+      <div class="card-body d-flex align-items-center gap-3">
+        <i class="bi bi-clipboard-plus fs-4 text-success"></i>
+        <span class="fw-semibold">Manage Exams</span>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-3">
+    <a href="#" class="card emp-action-card border-0 shadow-sm text-decoration-none">
+      <div class="card-body d-flex align-items-center gap-3">
+        <i class="bi bi-person-check fs-4 text-warning"></i>
+        <span class="fw-semibold">Approve Examiners</span>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-3">
+    <a href="#" class="card emp-action-card border-0 shadow-sm text-decoration-none">
+      <div class="card-body d-flex align-items-center gap-3">
+        <i class="bi bi-calendar2-check fs-4 text-info"></i>
+        <span class="fw-semibold">View All Slots</span>
+      </div>
+    </a>
+  </div>
+</div>
+{% endblock %}

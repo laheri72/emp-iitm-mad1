@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% block title %}Register — EMP{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+  <div class="col-md-6 col-lg-5">
+
+    <div class="text-center mb-4">
+      <i class="bi bi-journal-check display-4 emp-brand-icon"></i>
+      <h3 class="mt-2 fw-bold">Create Account</h3>
+      <p class="text-muted small">Examination Management Portal</p>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        <h5 class="card-title mb-4 fw-semibold">Register</h5>
+
+        <form method="POST" action="{{ url_for('auth.register') }}" novalidate id="registerForm">
+
+          <!-- Role selection — drives which extra fields appear -->
+          <div class="mb-3">
+            <label class="form-label">I am registering as</label>
+            <div class="d-flex gap-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio"
+                       name="role" id="roleStudent" value="student" checked />
+                <label class="form-check-label" for="roleStudent">
+                  <i class="bi bi-person-graduate me-1"></i>Student
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio"
+                       name="role" id="roleExaminer" value="examiner" />
+                <label class="form-check-label" for="roleExaminer">
+                  <i class="bi bi-person-badge me-1"></i>Examiner
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="name"
+              name="name"
+              placeholder="e.g. Rahul Sharma"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+
+          <!-- Extra fields only for examiners -->
+          <div id="examinerFields" style="display: none;">
+            <div class="mb-3">
+              <label for="department" class="form-label">Department</label>
+              <input
+                type="text"
+                class="form-control"
+                id="department"
+                name="department"
+                placeholder="e.g. Computer Science"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="phone" class="form-label">Contact Number</label>
+              <input
+                type="text"
+                class="form-control"
+                id="phone"
+                name="phone"
+                placeholder="10-digit mobile number"
+              />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              name="password"
+              placeholder="At least 6 characters"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="confirm_password" class="form-label">Confirm Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="confirm_password"
+              name="confirm_password"
+              placeholder="Repeat your password"
+              required
+            />
+          </div>
+
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn emp-btn-primary">
+              <i class="bi bi-person-plus me-2"></i>Create Account
+            </button>
+          </div>
+        </form>
+
+        <hr class="my-4" />
+
+        <p class="text-center mb-0 small">
+          Already have an account?
+          <a href="{{ url_for('auth.login') }}" class="emp-link">Login here</a>
+        </p>
+
+      </div>
+    </div>
+
+    <!-- note about examiner approval -->
+    <div class="alert alert-info mt-3 small">
+      <i class="bi bi-info-circle me-1"></i>
+      <strong>Examiners:</strong> Your account will be active only after admin approval.
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // show/hide department + phone fields based on role selection
+  // this is UI-only, not core logic, so JS is fine here per the spec
+  const radios = document.querySelectorAll('input[name="role"]');
+  const examinerFields = document.getElementById('examinerFields');
+
+  radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      examinerFields.style.display = radio.value === 'examiner' ? 'block' : 'none';
+    });
+  });
+</script>
+{% endblock %}

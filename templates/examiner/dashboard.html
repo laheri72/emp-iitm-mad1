@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}Examiner Dashboard — EMP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="fw-bold mb-0">Examiner Dashboard</h4>
+    <small class="text-muted">Welcome, {{ current_user.name }}
+      {% if current_user.department %} — {{ current_user.department }}{% endif %}
+    </small>
+  </div>
+  <span class="badge bg-warning text-dark py-2 px-3">Examiner</span>
+</div>
+
+<!-- Quick stats -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card stat-card border-0 shadow-sm h-100">
+      <div class="card-body text-center">
+        <i class="bi bi-calendar-event stat-icon text-primary"></i>
+        <div class="stat-number">{{ my_slots | length }}</div>
+        <div class="stat-label">Slots Created</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card border-0 shadow-sm h-100">
+      <div class="card-body text-center">
+        <i class="bi bi-people stat-icon text-success"></i>
+        <div class="stat-number">{{ booked_count }}</div>
+        <div class="stat-label">Students Booked</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card border-0 shadow-sm h-100">
+      <div class="card-body text-center">
+        <i class="bi bi-pencil-square stat-icon text-danger"></i>
+        <div class="stat-number">{{ pending_evals }}</div>
+        <div class="stat-label">Pending Evaluations</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- My slots table -->
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <span class="fw-semibold">My Examination Slots</span>
+    <a href="#" class="btn btn-sm emp-btn-primary">
+      <i class="bi bi-plus-circle me-1"></i>Create Slot
+    </a>
+  </div>
+  <div class="card-body p-0">
+    {% if my_slots %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Exam</th>
+            <th>Capacity</th>
+            <th>Available</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for slot in my_slots %}
+          <tr>
+            <td>{{ slot.date.strftime('%d %b %Y') }}</td>
+            <td>{{ slot.start_time.strftime('%H:%M') }} – {{ slot.end_time.strftime('%H:%M') }}</td>
+            <td>{{ slot.examination.exam_name }}</td>
+            <td>{{ slot.max_capacity }}</td>
+            <td>
+              <span class="badge {% if slot.available_seats == 0 %}bg-danger{% else %}bg-success{% endif %}">
+                {{ slot.available_seats }}
+              </span>
+            </td>
+            <td>
+              <span class="badge
+                {% if slot.status == 'Available' %}bg-success
+                {% elif slot.status == 'Full' %}bg-warning text-dark
+                {% elif slot.status == 'Cancelled' %}bg-secondary
+                {% else %}bg-info{% endif %}">
+                {{ slot.status }}
+              </span>
+            </td>
+            <td>
+              <a href="#" class="btn btn-sm btn-outline-primary">View</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+      No slots created yet. Check if slot creation is open.
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

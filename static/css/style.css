@@ -1,0 +1,141 @@
+/* ──────────────────────────────────────────────────────────────────
+   EMP — Examination Management Portal
+   Custom CSS — personal color theme on top of Bootstrap 5
+   Built for IITM App Dev 1, Sep 2026 Term
+   ────────────────────────────────────────────────────────────────── */
+
+/* CSS custom properties — change these two to retheme the whole app */
+:root {
+  --emp-primary:        #1a3c5e;   /* deep navy */
+  --emp-primary-hover:  #14304d;
+  --emp-accent:         #e8a020;   /* warm amber */
+  --emp-light-bg:       #f4f6f9;
+  --emp-card-radius:    10px;
+  --emp-font:           'Segoe UI', system-ui, sans-serif;
+}
+
+/* ── Global ────────────────────────────────────────────────────── */
+body {
+  font-family: var(--emp-font);
+  background-color: var(--emp-light-bg);
+  color: #212529;
+}
+
+/* ── Navbar ────────────────────────────────────────────────────── */
+.emp-navbar {
+  background-color: var(--emp-primary) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.emp-role-badge {
+  background-color: var(--emp-accent);
+  color: #1a1a1a;
+  font-size: 0.75rem;
+  border-radius: 20px;
+  padding: 4px 12px;
+}
+
+/* ── Brand icon on login/register ─────────────────────────────── */
+.emp-brand-icon {
+  color: var(--emp-primary);
+}
+
+/* ── Primary button ───────────────────────────────────────────── */
+.emp-btn-primary {
+  background-color: var(--emp-primary);
+  border-color: var(--emp-primary);
+  color: #fff;
+  border-radius: 6px;
+}
+
+.emp-btn-primary:hover {
+  background-color: var(--emp-primary-hover);
+  border-color: var(--emp-primary-hover);
+  color: #fff;
+}
+
+/* ── Links ─────────────────────────────────────────────────────── */
+.emp-link {
+  color: var(--emp-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.emp-link:hover {
+  color: var(--emp-accent);
+  text-decoration: underline;
+}
+
+/* ── Cards ─────────────────────────────────────────────────────── */
+.card {
+  border-radius: var(--emp-card-radius) !important;
+}
+
+/* ── Stat cards on dashboards ─────────────────────────────────── */
+.stat-card {
+  border-radius: var(--emp-card-radius);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1) !important;
+}
+
+.stat-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--emp-primary);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6c757d;
+  margin-top: 4px;
+}
+
+/* ── Quick action cards ───────────────────────────────────────── */
+.emp-action-card {
+  border-radius: var(--emp-card-radius);
+  transition: background-color 0.15s ease, transform 0.15s ease;
+  color: #212529;
+}
+
+.emp-action-card:hover {
+  background-color: #eef2f7;
+  transform: translateY(-1px);
+}
+
+/* ── Tables ────────────────────────────────────────────────────── */
+.table th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6c757d;
+}
+
+/* ── Footer ────────────────────────────────────────────────────── */
+.emp-footer {
+  border-top: 1px solid #dee2e6;
+  font-size: 0.78rem;
+  color: #adb5bd;
+}
+
+/* ── Responsive tweaks ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .stat-number {
+    font-size: 1.5rem;
+  }
+  .stat-icon {
+    font-size: 1.5rem;
+  }
+}

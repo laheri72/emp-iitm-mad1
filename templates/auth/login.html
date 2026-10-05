@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Login — EMP{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-5 col-lg-4">
+
+    <!-- portal header above the card -->
+    <div class="text-center mb-4">
+      <i class="bi bi-journal-check display-4 emp-brand-icon"></i>
+      <h3 class="mt-2 fw-bold">Examination Management Portal</h3>
+      <p class="text-muted small">IITM BS | September 2026 Term</p>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        <h5 class="card-title mb-4 fw-semibold">Sign In</h5>
+
+        <form method="POST" action="{{ url_for('auth.login') }}" novalidate>
+          <!-- CSRF protection via flask-wtf is not mandatory here,
+               but we keep hidden fields clean -->
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-envelope"></i>
+              </span>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                placeholder="you@example.com"
+                required
+                autofocus
+              />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-lock"></i>
+              </span>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn emp-btn-primary">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Login
+            </button>
+          </div>
+        </form>
+
+        <hr class="my-4" />
+
+        <p class="text-center mb-0 small">
+          Don't have an account?
+          <a href="{{ url_for('auth.register') }}" class="emp-link">Register here</a>
+        </p>
+
+      </div>
+    </div>
+
+    <!-- helpful note for first-time admin -->
+    <p class="text-center text-muted mt-3 small">
+      Admin default: <code>admin@emp.iitm.ac.in</code>
+    </p>
+
+  </div>
+</div>
+{% endblock %}
