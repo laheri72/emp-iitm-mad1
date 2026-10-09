@@ -38,3 +38,11 @@ def dashboard():
                            my_slots=my_slots,
                            booked_count=booked_count,
                            pending_evals=pending_evals)
+
+
+@examiner_bp.route('/slots')
+@login_required
+@examiner_required
+def my_slots():
+    # full slot management comes in Phase 3
+    return redirect(url_for('examiner.dashboard'))

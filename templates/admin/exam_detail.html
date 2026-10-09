@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% block title %}{{ exam.exam_name }} — Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-2 mb-4">
+  <a href="{{ url_for('admin.exams') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <h4 class="fw-bold mb-0">{{ exam.exam_name }}</h4>
+  <span class="badge ms-2
+    {% if exam.status == 'Draft' %}bg-secondary
+    {% elif exam.status == 'Slot Creation' %}bg-warning text-dark
+    {% elif exam.status == 'Booking Open' %}bg-success
+    {% elif exam.status == 'Closed' %}bg-danger
+    {% else %}bg-info{% endif %}">
+    {{ exam.status }}
+  </span>
+</div>
+
+<div class="row g-4">
+
+  <!-- Left: exam info + status control -->
+  <div class="col-lg-5">
+
+    <!-- Info card -->
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white fw-semibold d-flex justify-content-between">
+        Exam Details
+        <a href="{{ url_for('admin.exam_edit', exam_id=exam.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+      </div>
+      <div class="card-body">
+        <table class="table table-sm mb-0">
+          <tr><th>Course</th><td>{{ exam.course.course_code }} — {{ exam.course.course_name }}</td></tr>
+          <tr><th>Type</th><td>{{ exam.exam_type }}</td></tr>
+          <tr><th>Duration</th><td>{{ exam.duration }} minutes</td></tr>
+          <tr><th>Max Marks</th><td>{{ exam.max_marks }}</td></tr>
+          <tr><th>Slot Creation</th>
+            <td>
+              {% if exam.slot_creation_start %}
+                {{ exam.slot_creation_start.strftime('%d %b %Y %H:%M') }} →
+                {{ exam.slot_creation_end.strftime('%d %b %H:%M') }}
+              {% else %}—{% endif %}
+            </td>
+          </tr>
+          <tr><th>Booking Window</th>
+            <td>
+              {% if exam.booking_start %}
+                {{ exam.booking_start.strftime('%d %b %Y %H:%M') }} →
+                {{ exam.booking_end.strftime('%d %b %H:%M') }}
+              {% else %}—{% endif %}
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Status control -->
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white fw-semibold">Change Status</div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">
+          Current: <strong>{{ exam.status }}</strong>. Move the exam to the next stage.
+        </p>
+        <form method="POST" action="{{ url_for('admin.exam_set_status', exam_id=exam.id) }}">
+          <div class="d-flex gap-2 flex-wrap">
+            {% for s in ['Draft', 'Slot Creation', 'Booking Open', 'Closed', 'Completed'] %}
+            <button type="submit" name="status" value="{{ s }}"
+                    class="btn btn-sm {% if exam.status == s %}emp-btn-primary{% else %}btn-outline-secondary{% endif %}">
+              {{ s }}
+            </button>
+            {% endfor %}
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete -->
+    <form method="POST" action="{{ url_for('admin.exam_delete', exam_id=exam.id) }}"
+          onsubmit="return confirm('Delete this exam and all its rubrics and slots?')">
+      <button class="btn btn-sm btn-outline-danger">
+        <i class="bi bi-trash me-1"></i>Delete Exam
+      </button>
+    </form>
+
+  </div>
+
+  <!-- Right: rubrics -->
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Evaluation Rubric</span>
+        <a href="{{ url_for('admin.rubric_new', exam_id=exam.id) }}" class="btn btn-sm emp-btn-primary">
+          <i class="bi bi-plus-circle me-1"></i>Add Criterion
+        </a>
+      </div>
+      <div class="card-body p-0">
+        {% if exam.rubrics %}
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Criterion</th>
+              <th>Max Marks</th>
+              <th>Weightage</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in exam.rubrics %}
+            <tr>
+              <td>
+                <div class="fw-semibold">{{ r.criterion_name }}</div>
+                {% if r.description %}
+                <small class="text-muted">{{ r.description }}</small>
+                {% endif %}
+              </td>
+              <td>{{ r.max_marks }}</td>
+              <td>{{ r.weightage or '—' }}{% if r.weightage %}%{% endif %}</td>
+              <td>
+                <a href="{{ url_for('admin.rubric_edit', rubric_id=r.id) }}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+                <form method="POST" action="{{ url_for('admin.rubric_delete', rubric_id=r.id) }}" class="d-inline"
+                      onsubmit="return confirm('Remove this criterion?')">
+                  <button class="btn btn-sm btn-outline-danger">Del</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot class="table-light">
+            <tr>
+              <td class="fw-semibold">Total</td>
+              <td class="fw-semibold">{{ exam.rubrics | sum(attribute='max_marks') }}</td>
+              <td></td><td></td>
+            </tr>
+          </tfoot>
+        </table>
+        {% else %}
+        <div class="text-center py-4 text-muted">
+          <i class="bi bi-list-check fs-2 d-block mb-2"></i>
+          No rubric criteria yet. Add some so examiners know how to score.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Slots summary -->
+    <div class="card border-0 shadow-sm mt-3">
+      <div class="card-header bg-white fw-semibold">
+        Slots <span class="badge bg-secondary ms-1">{{ exam.slots | length }}</span>
+      </div>
+      <div class="card-body p-0">
+        {% if exam.slots %}
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0">
+            <thead class="table-light">
+              <tr><th>Date</th><th>Time</th><th>Examiner</th><th>Seats</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              {% for s in exam.slots %}
+              <tr>
+                <td>{{ s.date.strftime('%d %b %Y') }}</td>
+                <td>{{ s.start_time.strftime('%H:%M') }}–{{ s.end_time.strftime('%H:%M') }}</td>
+                <td>{{ s.examiner.name }}</td>
+                <td>{{ s.available_seats }}/{{ s.max_capacity }}</td>
+                <td><span class="badge
+                  {% if s.status == 'Available' %}bg-success
+                  {% elif s.status == 'Full' %}bg-warning text-dark
+                  {% elif s.status == 'Cancelled' %}bg-secondary
+                  {% else %}bg-info{% endif %}">{{ s.status }}</span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-3 text-muted small">
+          No slots created yet by examiners.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

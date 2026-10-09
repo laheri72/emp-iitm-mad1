@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit Criterion' if rubric else 'Add Criterion' }} — {{ exam.exam_name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <a href="{{ url_for('admin.exam_detail', exam_id=exam.id) }}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+      <h4 class="fw-bold mb-0">{{ 'Edit Criterion' if rubric else 'Add Criterion' }}</h4>
+    </div>
+    <p class="text-muted">Exam: <strong>{{ exam.exam_name }}</strong></p>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <form method="POST">
+
+          <div class="mb-3">
+            <label class="form-label">Criterion Name</label>
+            <input type="text" class="form-control" name="criterion_name"
+                   value="{{ rubric.criterion_name if rubric else '' }}"
+                   placeholder="e.g. Code Quality, Explanation, Functionality" required />
+          </div>
+
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="form-label">Max Marks</label>
+              <input type="number" class="form-control" name="max_marks"
+                     value="{{ rubric.max_marks if rubric else 10 }}" min="1" required />
+            </div>
+            <div class="col-6">
+              <label class="form-label">Weightage % <span class="text-muted">(optional)</span></label>
+              <input type="number" class="form-control" name="weightage"
+                     value="{{ rubric.weightage if rubric else '' }}"
+                     step="0.1" min="0" max="100" />
+            </div>
+          </div>
+
+          <div class="mb-3 mt-3">
+            <label class="form-label">Description <span class="text-muted">(optional)</span></label>
+            <textarea class="form-control" name="description" rows="2"
+                      placeholder="What this criterion evaluates">{{ rubric.description if rubric else '' }}</textarea>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn emp-btn-primary">
+              {{ 'Save Changes' if rubric else 'Add Criterion' }}
+            </button>
+            <a href="{{ url_for('admin.exam_detail', exam_id=exam.id) }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -36,3 +36,11 @@ def dashboard():
                            open_exams=open_exams,
                            my_bookings=my_bookings,
                            past_bookings=past_bookings)
+
+
+@student_bp.route('/bookings')
+@login_required
+@student_required
+def my_bookings():
+    # full booking page comes in Phase 3
+    return redirect(url_for('student.dashboard'))

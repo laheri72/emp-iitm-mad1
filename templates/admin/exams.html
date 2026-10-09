@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Examinations — Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0">Examinations</h4>
+  <a href="{{ url_for('admin.exam_new') }}" class="btn emp-btn-primary">
+    <i class="bi bi-plus-circle me-1"></i>Add Exam
+  </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    {% if exams %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Course</th>
+            <th>Type</th>
+            <th>Duration</th>
+            <th>Max Marks</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in exams %}
+          <tr>
+            <td class="fw-semibold">{{ e.exam_name }}</td>
+            <td><span class="badge bg-secondary">{{ e.course.course_code }}</span></td>
+            <td>{{ e.exam_type }}</td>
+            <td>{{ e.duration }} min</td>
+            <td>{{ e.max_marks }}</td>
+            <td>
+              <span class="badge
+                {% if e.status == 'Draft' %}bg-secondary
+                {% elif e.status == 'Slot Creation' %}bg-warning text-dark
+                {% elif e.status == 'Booking Open' %}bg-success
+                {% elif e.status == 'Closed' %}bg-danger
+                {% else %}bg-info{% endif %}">
+                {{ e.status }}
+              </span>
+            </td>
+            <td>
+              <a href="{{ url_for('admin.exam_detail', exam_id=e.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-clipboard-x fs-2 d-block mb-2"></i>
+      No examinations yet. <a href="{{ url_for('admin.exam_new') }}">Add one</a>.
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -93,7 +93,7 @@
 </h6>
 <div class="row g-3">
   <div class="col-md-3">
-    <a href="#" class="card emp-action-card border-0 shadow-sm text-decoration-none">
+    <a href="{{ url_for('admin.courses') }}" class="card emp-action-card border-0 shadow-sm text-decoration-none">
       <div class="card-body d-flex align-items-center gap-3">
         <i class="bi bi-book fs-4 text-primary"></i>
         <span class="fw-semibold">Manage Courses</span>
@@ -101,7 +101,7 @@
     </a>
   </div>
   <div class="col-md-3">
-    <a href="#" class="card emp-action-card border-0 shadow-sm text-decoration-none">
+    <a href="{{ url_for('admin.exams') }}" class="card emp-action-card border-0 shadow-sm text-decoration-none">
       <div class="card-body d-flex align-items-center gap-3">
         <i class="bi bi-clipboard-plus fs-4 text-success"></i>
         <span class="fw-semibold">Manage Exams</span>
@@ -109,7 +109,7 @@
     </a>
   </div>
   <div class="col-md-3">
-    <a href="#" class="card emp-action-card border-0 shadow-sm text-decoration-none">
+    <a href="{{ url_for('admin.examiners') }}" class="card emp-action-card border-0 shadow-sm text-decoration-none">
       <div class="card-body d-flex align-items-center gap-3">
         <i class="bi bi-person-check fs-4 text-warning"></i>
         <span class="fw-semibold">Approve Examiners</span>
@@ -117,10 +117,10 @@
     </a>
   </div>
   <div class="col-md-3">
-    <a href="#" class="card emp-action-card border-0 shadow-sm text-decoration-none">
+    <a href="{{ url_for('admin.students') }}" class="card emp-action-card border-0 shadow-sm text-decoration-none">
       <div class="card-body d-flex align-items-center gap-3">
-        <i class="bi bi-calendar2-check fs-4 text-info"></i>
-        <span class="fw-semibold">View All Slots</span>
+        <i class="bi bi-people fs-4 text-info"></i>
+        <span class="fw-semibold">View Students</span>
       </div>
     </a>
   </div>

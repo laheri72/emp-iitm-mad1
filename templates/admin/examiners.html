@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Examiners — Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0">Examiners</h4>
+  <span class="badge bg-warning text-dark py-2 px-3">
+    {{ examiners | selectattr('is_approved', 'equalto', false) | list | length }} pending
+  </span>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    {% if examiners %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Department</th>
+            <th>Registered</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in examiners %}
+          <tr>
+            <td class="fw-semibold">{{ e.name }}</td>
+            <td>{{ e.email }}</td>
+            <td>{{ e.department or '—' }}</td>
+            <td class="text-muted small">{{ e.created_at.strftime('%d %b %Y') }}</td>
+            <td>
+              {% if not e.is_active %}
+                <span class="badge bg-danger">Deactivated</span>
+              {% elif e.is_approved %}
+                <span class="badge bg-success">Approved</span>
+              {% else %}
+                <span class="badge bg-warning text-dark">Pending</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if not e.is_approved or not e.is_active %}
+              <form method="POST" action="{{ url_for('admin.examiner_approve', user_id=e.id) }}" class="d-inline">
+                <button class="btn btn-sm btn-success me-1">Approve</button>
+              </form>
+              {% endif %}
+              {% if e.is_active %}
+              <form method="POST" action="{{ url_for('admin.examiner_deactivate', user_id=e.id) }}" class="d-inline"
+                    onsubmit="return confirm('Deactivate {{ e.name }}?')">
+                <button class="btn btn-sm btn-outline-danger">Deactivate</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-person-badge fs-2 d-block mb-2"></i>
+      No examiners registered yet.
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

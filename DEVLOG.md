@@ -36,3 +36,32 @@ default bootstrap blue).
 next: admin CRUD for courses, exams, rubrics, examiner approval
 
 ---
+
+## 09 Oct 2026
+
+built out all the admin functionality today.
+
+courses — basic CRUD, can't delete a course if it has exams under it (would break FK refs).
+course code is readonly on edit because changing it after exams are linked would be messy.
+
+examinations — CRUD with the 4 timeline date fields (slot_creation_start/end, booking_start/end).
+kept a `set-status` route separate from edit, so admin explicitly moves the exam through stages
+rather than just setting status in the edit form. feels cleaner and prevents accidents.
+
+rubrics — added per-exam rubric criteria management. the exam detail page shows a running
+total of max_marks across all criteria which is handy.
+
+examiner approval — list shows pending/approved/deactivated with inline approve and
+deactivate buttons. deactivate also sets is_approved=False so they can't log back in.
+
+student list has a basic name/email search filter using ilike.
+
+updated the navbar to have dropdowns for admin — Courses, Exams, Users. looks cleaner
+than cramming everything into one level.
+
+also added stub /slots and /bookings routes for examiner and student so the navbar links
+don't 404 — those get built properly in Phase 3.
+
+next: examiner slot creation + student slot booking (the core of the app)
+
+---

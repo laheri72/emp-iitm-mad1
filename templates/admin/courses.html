@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Courses — Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0">Courses</h4>
+  <a href="{{ url_for('admin.course_new') }}" class="btn emp-btn-primary">
+    <i class="bi bi-plus-circle me-1"></i>Add Course
+  </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    {% if courses %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Exams</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in courses %}
+          <tr>
+            <td><span class="badge bg-secondary">{{ c.course_code }}</span></td>
+            <td class="fw-semibold">{{ c.course_name }}</td>
+            <td class="text-muted small">{{ c.description or '—' }}</td>
+            <td>
+              <span class="badge {% if c.status == 'active' %}bg-success{% else %}bg-secondary{% endif %}">
+                {{ c.status }}
+              </span>
+            </td>
+            <td>{{ c.examinations | length }}</td>
+            <td>
+              <a href="{{ url_for('admin.course_edit', course_id=c.id) }}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+              <form method="POST" action="{{ url_for('admin.course_delete', course_id=c.id) }}" class="d-inline"
+                    onsubmit="return confirm('Delete this course?')">
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-book fs-2 d-block mb-2"></i>
+      No courses yet. <a href="{{ url_for('admin.course_new') }}">Add one</a>.
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
