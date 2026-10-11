@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}{{ exam.exam_name }} — Book a Slot{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-2 mb-2">
+  <a href="{{ url_for('student.browse_exams') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <h4 class="fw-bold mb-0">{{ exam.exam_name }}</h4>
+</div>
+<p class="text-muted mb-4">
+  {{ exam.course.course_code }} &nbsp;·&nbsp; {{ exam.exam_type }} &nbsp;·&nbsp;
+  {{ exam.duration }} min &nbsp;·&nbsp; {{ exam.max_marks }} marks
+</p>
+
+{% if already_booked %}
+<div class="alert alert-success d-flex align-items-center gap-2">
+  <i class="bi bi-check-circle-fill"></i>
+  <div>
+    You already have a booking for this exam on
+    <strong>{{ already_booked.slot.date.strftime('%d %b %Y') }}</strong>
+    at <strong>{{ already_booked.slot.start_time.strftime('%H:%M') }}</strong>.
+    <a href="{{ url_for('student.my_bookings') }}" class="alert-link ms-2">View my bookings →</a>
+  </div>
+</div>
+{% endif %}
+
+{% if slots and not already_booked %}
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white fw-semibold">
+    Available Slots
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Examiner</th>
+          <th>Seats Left</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in slots %}
+        <tr>
+          <td class="fw-semibold">{{ s.date.strftime('%d %b %Y') }}</td>
+          <td>{{ s.start_time.strftime('%H:%M') }} – {{ s.end_time.strftime('%H:%M') }}</td>
+          <td>{{ s.examiner.name }}</td>
+          <td>
+            <span class="badge {% if s.available_seats > 2 %}bg-success{% elif s.available_seats > 0 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+              {{ s.available_seats }} left
+            </span>
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('student.book_slot', slot_id=s.id) }}"
+                  onsubmit="return confirm('Confirm booking for {{ s.date.strftime('%d %b') }} at {{ s.start_time.strftime('%H:%M') }}?')">
+              <button class="btn btn-sm emp-btn-primary" {% if s.available_seats == 0 %}disabled{% endif %}>
+                Book
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% elif not already_booked %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body text-center py-5 text-muted">
+    <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+    No available slots for this exam right now.
+    <br><small>Examiners may not have created any yet, or all slots are full.</small>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

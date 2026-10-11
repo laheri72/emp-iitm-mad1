@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}My Slots{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0">My Slots</h4>
+  <a href="{{ url_for('examiner.slot_new') }}" class="btn emp-btn-primary">
+    <i class="bi bi-plus-circle me-1"></i>Add Slot
+  </a>
+</div>
+
+{% if slots %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Exam</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Seats</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in slots %}
+          <tr>
+            <td>
+              <div class="fw-semibold">{{ s.examination.exam_name }}</div>
+              <small class="text-muted">{{ s.examination.course.course_code }}</small>
+            </td>
+            <td>{{ s.date.strftime('%d %b %Y') }}</td>
+            <td>{{ s.start_time.strftime('%H:%M') }} – {{ s.end_time.strftime('%H:%M') }}</td>
+            <td>
+              <span class="badge bg-secondary">{{ s.available_seats }}/{{ s.max_capacity }}</span>
+            </td>
+            <td>
+              <span class="badge
+                {% if s.status == 'Available' %}bg-success
+                {% elif s.status == 'Full' %}bg-warning text-dark
+                {% elif s.status == 'Cancelled' %}bg-secondary
+                {% else %}bg-info{% endif %}">
+                {{ s.status }}
+              </span>
+            </td>
+            <td>
+              <a href="{{ url_for('examiner.slot_bookings', slot_id=s.id) }}"
+                 class="btn btn-sm btn-outline-primary me-1">
+                Bookings ({{ s.bookings | selectattr('status', 'equalto', 'Booked') | list | length }})
+              </a>
+              {% if s.status != 'Cancelled' %}
+              <a href="{{ url_for('examiner.slot_edit', slot_id=s.id) }}"
+                 class="btn btn-sm btn-outline-secondary me-1">Edit</a>
+              <form method="POST" action="{{ url_for('examiner.slot_cancel', slot_id=s.id) }}"
+                    class="d-inline" onsubmit="return confirm('Cancel this slot?')">
+                <button class="btn btn-sm btn-outline-danger">Cancel</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body text-center py-5 text-muted">
+    <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+    No slots created yet.
+    {% if not open_exams is defined %}
+    Check if the admin has opened slot creation for any exam.
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

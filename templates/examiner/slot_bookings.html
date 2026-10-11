@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Slot Bookings — {{ slot.examination.exam_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-2 mb-4">
+  <a href="{{ url_for('examiner.my_slots') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <div>
+    <h4 class="fw-bold mb-0">{{ slot.examination.exam_name }}</h4>
+    <small class="text-muted">
+      {{ slot.date.strftime('%d %b %Y') }},
+      {{ slot.start_time.strftime('%H:%M') }} – {{ slot.end_time.strftime('%H:%M') }}
+      &nbsp;·&nbsp; {{ slot.available_seats }}/{{ slot.max_capacity }} seats remaining
+    </small>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    {% set active_bookings = slot.bookings | selectattr('status', 'equalto', 'Booked') | list %}
+    {% if active_bookings %}
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Student Name</th>
+          <th>Email</th>
+          <th>Booked On</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in slot.bookings %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td class="fw-semibold">{{ b.student.name }}</td>
+          <td>{{ b.student.email }}</td>
+          <td class="text-muted small">{{ b.booking_date.strftime('%d %b %Y %H:%M') }}</td>
+          <td>
+            <span class="badge {% if b.status == 'Booked' %}bg-success{% elif b.status == 'Cancelled' %}bg-secondary{% else %}bg-info{% endif %}">
+              {{ b.status }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-person-x fs-2 d-block mb-2"></i>
+      No bookings for this slot yet.
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

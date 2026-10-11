@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit Slot' if slot else 'New Slot' }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <a href="{{ url_for('examiner.my_slots') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+      <h4 class="fw-bold mb-0">{{ 'Edit Slot' if slot else 'New Slot' }}</h4>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <form method="POST">
+
+          {% if not slot %}
+          <div class="mb-3">
+            <label class="form-label">Exam</label>
+            {% if open_exams %}
+            <select class="form-select" name="exam_id" required>
+              <option value="">Select exam...</option>
+              {% for e in open_exams %}
+              <option value="{{ e.id }}">{{ e.exam_name }} ({{ e.course.course_code }})</option>
+              {% endfor %}
+            </select>
+            {% else %}
+            <div class="alert alert-warning py-2">
+              No exams are currently open for slot creation. Ask admin to open slot creation.
+            </div>
+            {% endif %}
+          </div>
+          {% else %}
+          <p class="text-muted mb-3">
+            Exam: <strong>{{ slot.examination.exam_name }}</strong>
+          </p>
+          {% endif %}
+
+          <div class="mb-3">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-control" name="date"
+                   value="{{ slot.date.isoformat() if slot else '' }}" required />
+          </div>
+
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="form-label">Start Time</label>
+              <input type="time" class="form-control" name="start_time"
+                     value="{{ slot.start_time.strftime('%H:%M') if slot else '' }}" required />
+            </div>
+            <div class="col-6">
+              <label class="form-label">End Time</label>
+              <input type="time" class="form-control" name="end_time"
+                     value="{{ slot.end_time.strftime('%H:%M') if slot else '' }}" required />
+            </div>
+          </div>
+
+          <div class="mt-3 mb-3">
+            <label class="form-label">Max Capacity (seats)</label>
+            <input type="number" class="form-control" name="max_capacity"
+                   value="{{ slot.max_capacity if slot else 1 }}" min="1" max="50" required />
+          </div>
+
+          {% if slot %}
+          <div class="alert alert-info py-2 small">
+            <i class="bi bi-info-circle me-1"></i>
+            Editing resets available seats to the new capacity. Only allowed if no bookings exist.
+          </div>
+          {% endif %}
+
+          <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn emp-btn-primary"
+                    {% if not slot and not open_exams %}disabled{% endif %}>
+              {{ 'Save Changes' if slot else 'Create Slot' }}
+            </button>
+            <a href="{{ url_for('examiner.my_slots') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

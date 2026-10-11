@@ -65,3 +65,33 @@ don't 404 — those get built properly in Phase 3.
 next: examiner slot creation + student slot booking (the core of the app)
 
 ---
+
+## 11 Oct 2026
+
+built the slot creation and booking system today — this is the main part of the whole project.
+
+examiner side:
+- `/examiner/slots` — lists all slots the examiner created, shows live booking count per slot
+- `/examiner/slots/new` — create a slot, only shows exams currently in slot creation window
+  (uses `is_slot_creation_open()` to filter, not just the status field)
+- edit slot — only allowed if no students have booked yet. didn't want to let examiners
+  change the date after students have committed to it.
+- cancel slot — cancels all active bookings on that slot too, keeps data consistent
+
+student side:
+- `/student/exams` — shows only exams where booking is actually open (status + datetime check)
+- `/student/exams/<id>/slots` — shows available slots for an exam
+  checks if student already has a booking for this exam before showing the book button
+- booking logic has 3 guards:
+  1. is_booking_open() — time window check
+  2. has_seats() — available_seats > 0
+  3. duplicate check — JOIN query to see if student already booked same exam
+  then: decrement available_seats, set status='Full' if it hits 0
+- cancellation: restore available_seats, set slot back to 'Available' if it was 'Full'
+
+also wired up all the placeholder href="#" buttons in student dashboard, and added
+Browse Exams to the student navbar.
+
+next: evaluation (examiner marks students per rubric criterion)
+
+---
