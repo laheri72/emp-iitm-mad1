@@ -92,6 +92,18 @@ student side:
 also wired up all the placeholder href="#" buttons in student dashboard, and added
 Browse Exams to the student navbar.
 
+hit a weird bug while testing with overlapping dates:
+when slot creation and booking dates overlapped, student wasn't seeing the exam under open exams
+even though admin set status to 'Booking Open'.
+dug into it and found two reasons:
+1. was using `datetime.utcnow()` in is_booking_open() and is_slot_creation_open() — but the
+   form sends local time (IST). UTC is 5.5 hours behind local time so python was comparing
+   1:01 PM against 9:25 AM and thinking booking hadn't started yet! changed all utcnow calls
+   to `datetime.now()` to stay consistent with local naive datetimes.
+2. during overlap periods when admin flips status to 'Booking Open', examiners should still
+   be able to add slots until slot_creation_end. updated `is_slot_creation_open()` to allow
+   status in ('Slot Creation', 'Booking Open') as long as the slot creation end time hasn't passed.
+
 next: evaluation (examiner marks students per rubric criterion)
 
 ---

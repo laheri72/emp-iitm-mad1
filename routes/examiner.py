@@ -59,9 +59,10 @@ def my_slots():
 @login_required
 @examiner_required
 def slot_new():
-    # only show exams currently in slot creation window
-    open_exams = [e for e in Examination.query.filter_by(status='Slot Creation').all()
-                  if e.is_slot_creation_open()]
+    # show exams in slot creation window (even if booking is already open if dates overlap)
+    open_exams = [e for e in Examination.query.filter(
+        Examination.status.in_(['Slot Creation', 'Booking Open'])
+    ).all() if e.is_slot_creation_open()]
 
     if request.method == 'POST':
         exam_id = request.form.get('exam_id')

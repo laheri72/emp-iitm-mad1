@@ -22,7 +22,7 @@ class User(UserMixin, db.Model):
     department = db.Column(db.String(100), nullable=True)
     phone = db.Column(db.String(20), nullable=True)
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
 
     slots_created = db.relationship('ExaminationSlot', backref='examiner', lazy=True,
                                     foreign_keys='ExaminationSlot.examiner_id')
@@ -61,7 +61,7 @@ class Course(db.Model):
     course_name = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(20), default='active')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
 
     examinations = db.relationship('Examination', backref='course', lazy=True)
 
@@ -87,23 +87,31 @@ class Examination(db.Model):
 
     # Draft -> Slot Creation -> Booking Open -> Closed -> Completed
     status = db.Column(db.String(30), default='Draft')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
 
     rubrics = db.relationship('ExaminationRubric', backref='examination', lazy=True,
                               cascade='all, delete-orphan')
     slots = db.relationship('ExaminationSlot', backref='examination', lazy=True)
 
     def is_slot_creation_open(self):
-        now = datetime.utcnow()
-        if self.status == 'Slot Creation' and self.slot_creation_start and self.slot_creation_end:
-            return self.slot_creation_start <= now <= self.slot_creation_end
-        return False
+        if self.status not in ('Slot Creation', 'Booking Open'):
+            return False
+        now = datetime.now()
+        if self.slot_creation_start and now < self.slot_creation_start:
+            return False
+        if self.slot_creation_end and now > self.slot_creation_end:
+            return False
+        return True
 
     def is_booking_open(self):
-        now = datetime.utcnow()
-        if self.status == 'Booking Open' and self.booking_start and self.booking_end:
-            return self.booking_start <= now <= self.booking_end
-        return False
+        if self.status != 'Booking Open':
+            return False
+        now = datetime.now()
+        if self.booking_start and now < self.booking_start:
+            return False
+        if self.booking_end and now > self.booking_end:
+            return False
+        return True
 
     def __repr__(self):
         return f'<Examination {self.exam_name} [{self.status}]>'
@@ -140,7 +148,7 @@ class ExaminationSlot(db.Model):
     available_seats = db.Column(db.Integer, nullable=False, default=1)
     status = db.Column(db.String(20), default='Available')  # Available / Full / Cancelled / Completed
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
 
     bookings = db.relationship('Booking', backref='slot', lazy=True)
 
@@ -157,7 +165,7 @@ class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     slot_id = db.Column(db.Integer, db.ForeignKey('examination_slots.id'), nullable=False)
-    booking_date = db.Column(db.DateTime, default=datetime.utcnow)
+    booking_date = db.Column(db.DateTime, default=datetime.now)
     status = db.Column(db.String(20), default='Booked')  # Booked / Cancelled / Completed
 
     evaluations = db.relationship('Evaluation', backref='booking', lazy=True,
@@ -176,7 +184,7 @@ class Evaluation(db.Model):
     evaluated_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     marks_awarded = db.Column(db.Integer, nullable=False, default=0)
     remarks = db.Column(db.Text, nullable=True)
-    evaluated_at = db.Column(db.DateTime, default=datetime.utcnow)
+    evaluated_at = db.Column(db.DateTime, default=datetime.now)
 
     def __repr__(self):
         return f'<Evaluation booking={self.booking_id} rubric={self.rubric_id} marks={self.marks_awarded}>'
