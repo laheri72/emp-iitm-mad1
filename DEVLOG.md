@@ -107,3 +107,33 @@ dug into it and found two reasons:
 next: evaluation (examiner marks students per rubric criterion)
 
 ---
+
+## 15 Oct 2026
+
+built the evaluation system today.
+
+examiner side:
+- `/examiner/evaluate` — shows all my slots that have bookings, grouped, with pending/completed status
+- `/examiner/bookings/<id>/evaluate` — the actual evaluation form
+  one row per rubric criterion, marks input with max shown inline, optional remarks field
+  validates marks are within 0–max_marks range for each criterion
+  if evaluation already exists for a criterion, it pre-fills (allows re-evaluation)
+  on submit: creates one Evaluation row per rubric, marks booking as 'Completed',
+  marks slot as 'Completed' (using slot.status = 'Completed')
+- added Evaluate link to examiner navbar
+
+student side:
+- `/student/results/<booking_id>` — shows score breakdown per criterion with total and percentage
+  only accessible once booking.status == 'Completed'
+  shows eval_map dict to look up each rubric's evaluation quickly
+- added View button in past bookings table (shows 'Pending' if not evaluated yet)
+
+admin side:
+- `/admin/exams/<id>/results` — all bookings for an exam in one table with marks and score %
+- `/admin/bookings` — all bookings system-wide with student search
+- added All Bookings to Users dropdown in navbar
+- added View Results button on exam detail page
+
+next: Phase 5 — admin power features (reschedule, change examiner, search across everything)
+
+---

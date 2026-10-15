@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Results — {{ exam.exam_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-2 mb-4">
+  <a href="{{ url_for('admin.exam_detail', exam_id=exam.id) }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <h4 class="fw-bold mb-0">Results — {{ exam.exam_name }}</h4>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    {% if bookings %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Student</th>
+            <th>Slot Date</th>
+            <th>Examiner</th>
+            <th>Status</th>
+            <th>Total Marks</th>
+            <th>Score %</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in bookings %}
+          {% set total = b.evaluations | sum(attribute='marks_awarded') %}
+          <tr>
+            <td>
+              <div class="fw-semibold">{{ b.student.name }}</div>
+              <small class="text-muted">{{ b.student.email }}</small>
+            </td>
+            <td>{{ b.slot.date.strftime('%d %b %Y') }}</td>
+            <td>{{ b.slot.examiner.name }}</td>
+            <td>
+              <span class="badge
+                {% if b.status == 'Booked' %}bg-warning text-dark
+                {% elif b.status == 'Completed' %}bg-success
+                {% else %}bg-secondary{% endif %}">
+                {{ b.status }}
+              </span>
+            </td>
+            <td>
+              {% if b.evaluations %}
+              <strong>{{ total }}</strong> / {{ exam.max_marks }}
+              {% else %}
+              <span class="text-muted">Not evaluated</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if b.evaluations %}
+              {% set pct = (total / exam.max_marks * 100) | round(1) %}
+              <span class="{% if pct >= 50 %}text-success{% else %}text-danger{% endif %} fw-semibold">
+                {{ pct }}%
+              </span>
+              {% else %}—{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+      No bookings for this exam yet.
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

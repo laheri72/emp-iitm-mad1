@@ -322,3 +322,38 @@ def students():
         query = query.filter(User.name.ilike(f'%{q}%') | User.email.ilike(f'%{q}%'))
     all_students = query.order_by(User.created_at.desc()).all()
     return render_template('admin/students.html', students=all_students, q=q)
+
+
+# ── exam results overview ──────────────────────────────────────────────────────
+
+@admin_bp.route('/exams/<int:exam_id>/results')
+@login_required
+@admin_required
+def exam_results(exam_id):
+    exam = Examination.query.get_or_404(exam_id)
+    # all bookings for this exam (across all slots)
+    all_bookings = (
+        Booking.query
+        .join(ExaminationSlot, Booking.slot_id == ExaminationSlot.id)
+        .filter(ExaminationSlot.exam_id == exam_id)
+        .order_by(Booking.status, Booking.booking_date)
+        .all()
+    )
+    return render_template('admin/exam_results.html', exam=exam, bookings=all_bookings)
+
+
+# ── admin bookings overview ────────────────────────────────────────────────────
+
+@admin_bp.route('/bookings')
+@login_required
+@admin_required
+def all_bookings():
+    q = request.args.get('q', '').strip()
+    query = Booking.query.join(ExaminationSlot)
+    if q:
+        query = query.join(User, Booking.student_id == User.id).filter(
+            User.name.ilike(f'%{q}%') | User.email.ilike(f'%{q}%')
+        )
+    bookings = query.order_by(Booking.booking_date.desc()).all()
+    return render_template('admin/all_bookings.html', bookings=bookings, q=q)
+

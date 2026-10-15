@@ -64,13 +64,14 @@
           <th>Date</th>
           <th>Status</th>
           <th>Marks</th>
+          <th>Result</th>
         </tr>
       </thead>
       <tbody>
         {% for b in past %}
         <tr>
           <td>{{ b.slot.examination.exam_name }}</td>
-          <td class="text-muted small">{{ b.slot.date.strftime('%d %b %Y') }}</td>
+          <td>{{ b.slot.date.strftime('%d %b %Y') }}</td>
           <td>
             <span class="badge {% if b.status == 'Completed' %}bg-success{% else %}bg-secondary{% endif %}">
               {{ b.status }}
@@ -81,6 +82,14 @@
             {{ b.evaluations | sum(attribute='marks_awarded') }} /
             {{ b.slot.examination.max_marks }}
             {% else %}—{% endif %}
+          </td>
+          <td>
+            {% if b.status == 'Completed' and b.evaluations %}
+            <a href="{{ url_for('student.result_detail', booking_id=b.id) }}"
+               class="btn btn-sm btn-outline-info">View</a>
+            {% else %}
+            <span class="text-muted small">Pending</span>
+            {% endif %}
           </td>
         </tr>
         {% endfor %}

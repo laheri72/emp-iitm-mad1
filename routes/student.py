@@ -161,3 +161,31 @@ def cancel_booking(booking_id):
     db.session.commit()
     flash('Booking cancelled.', 'info')
     return redirect(url_for('student.my_bookings'))
+
+
+@student_bp.route('/results/<int:booking_id>')
+@login_required
+@student_required
+def result_detail(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+
+    if booking.student_id != current_user.id:
+        flash('Not your result.', 'danger')
+        return redirect(url_for('student.my_bookings'))
+
+    if booking.status != 'Completed':
+        flash('Results are not available yet.', 'info')
+        return redirect(url_for('student.my_bookings'))
+
+    exam = booking.slot.examination
+    rubrics = exam.rubrics
+    eval_map = {e.rubric_id: e for e in booking.evaluations}
+    total = sum(e.marks_awarded for e in booking.evaluations)
+
+    return render_template('student/result_detail.html',
+                           booking=booking,
+                           exam=exam,
+                           rubrics=rubrics,
+                           eval_map=eval_map,
+                           total=total)
+

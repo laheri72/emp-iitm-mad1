@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Evaluate Students{% endblock %}
+
+{% block content %}
+<h4 class="fw-bold mb-4">Evaluate Students</h4>
+
+{% if slots %}
+{% for slot in slots %}
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <div>
+      <span class="fw-semibold">{{ slot.examination.exam_name }}</span>
+      <span class="text-muted ms-2 small">
+        {{ slot.date.strftime('%d %b %Y') }}
+        {{ slot.start_time.strftime('%H:%M') }}–{{ slot.end_time.strftime('%H:%M') }}
+      </span>
+    </div>
+    <span class="badge
+      {% if slot.status == 'Available' %}bg-success
+      {% elif slot.status == 'Full' %}bg-warning text-dark
+      {% elif slot.status == 'Completed' %}bg-info
+      {% else %}bg-secondary{% endif %}">
+      {{ slot.status }}
+    </span>
+  </div>
+  <div class="card-body p-0">
+    {% if slot.examination.rubrics %}
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Student</th>
+          <th>Booked On</th>
+          <th>Status</th>
+          <th>Marks</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in slot.bookings %}
+        <tr>
+          <td class="fw-semibold">{{ b.student.name }}<br><small class="text-muted">{{ b.student.email }}</small></td>
+          <td class="text-muted small">{{ b.booking_date.strftime('%d %b %Y') }}</td>
+          <td>
+            <span class="badge
+              {% if b.status == 'Booked' %}bg-warning text-dark
+              {% elif b.status == 'Completed' %}bg-success
+              {% else %}bg-secondary{% endif %}">
+              {{ b.status }}
+            </span>
+          </td>
+          <td>
+            {% if b.evaluations %}
+            {{ b.evaluations | sum(attribute='marks_awarded') }} / {{ slot.examination.max_marks }}
+            {% else %}
+            <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if b.status != 'Cancelled' %}
+            <a href="{{ url_for('examiner.evaluate_booking', booking_id=b.id) }}"
+               class="btn btn-sm {% if b.evaluations %}btn-outline-secondary{% else %}emp-btn-primary{% endif %}">
+              {% if b.evaluations %}Re-evaluate{% else %}Evaluate{% endif %}
+            </a>
+            {% else %}
+            <span class="text-muted small">Cancelled</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="text-center py-3 text-muted small">
+      <i class="bi bi-exclamation-circle me-1"></i>
+      No rubric criteria set for this exam. Admin needs to add rubrics before you can evaluate.
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body text-center py-5 text-muted">
+    <i class="bi bi-person-check fs-2 d-block mb-2"></i>
+    No slots with bookings yet.
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Evaluate — {{ booking.student.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-2 mb-4">
+  <a href="{{ url_for('examiner.evaluate_list') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <div>
+    <h4 class="fw-bold mb-0">Evaluate: {{ booking.student.name }}</h4>
+    <small class="text-muted">
+      {{ booking.slot.examination.exam_name }} ·
+      {{ booking.slot.date.strftime('%d %b %Y') }}
+      {{ booking.slot.start_time.strftime('%H:%M') }}
+    </small>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white">
+        <div class="d-flex justify-content-between">
+          <span class="fw-semibold">Rubric — Enter Marks</span>
+          <span class="text-muted small">Max total: {{ booking.slot.examination.max_marks }} marks</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <form method="POST" id="evalForm">
+
+          <div class="table-responsive mb-4">
+            <table class="table table-bordered align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Criterion</th>
+                  <th style="width:120px">Marks <span class="text-muted fw-normal">(max)</span></th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for rubric in rubrics %}
+                <tr>
+                  <td>
+                    <div class="fw-semibold">{{ rubric.criterion_name }}</div>
+                    {% if rubric.description %}
+                    <small class="text-muted">{{ rubric.description }}</small>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div class="input-group input-group-sm">
+                      <input type="number"
+                             class="form-control"
+                             name="marks_{{ rubric.id }}"
+                             value="{{ existing[rubric.id].marks_awarded if rubric.id in existing else '' }}"
+                             min="0" max="{{ rubric.max_marks }}"
+                             placeholder="0–{{ rubric.max_marks }}"
+                             required />
+                      <span class="input-group-text text-muted">/{{ rubric.max_marks }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <input type="text"
+                           class="form-control form-control-sm"
+                           name="remarks_{{ rubric.id }}"
+                           value="{{ existing[rubric.id].remarks if rubric.id in existing else '' }}"
+                           placeholder="Optional remarks" />
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          {% if booking.evaluations %}
+          <div class="alert alert-info py-2 small mb-3">
+            <i class="bi bi-info-circle me-1"></i>
+            Evaluation already submitted. Submitting again will update the marks.
+          </div>
+          {% endif %}
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn emp-btn-primary">
+              <i class="bi bi-check-circle me-1"></i>Submit Evaluation
+            </button>
+            <a href="{{ url_for('examiner.slot_bookings', slot_id=booking.slot.id) }}"
+               class="btn btn-outline-secondary">Cancel</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

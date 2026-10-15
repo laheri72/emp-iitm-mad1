@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Result — {{ exam.exam_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-2 mb-4">
+  <a href="{{ url_for('student.my_bookings') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <div>
+    <h4 class="fw-bold mb-0">{{ exam.exam_name }}</h4>
+    <small class="text-muted">
+      {{ booking.slot.date.strftime('%d %b %Y') }} ·
+      {{ booking.slot.start_time.strftime('%H:%M') }}–{{ booking.slot.end_time.strftime('%H:%M') }} ·
+      Examiner: {{ booking.slot.examiner.name }}
+    </small>
+  </div>
+</div>
+
+<!-- Score summary card -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm text-center py-3">
+      <div class="display-5 fw-bold emp-text-primary">{{ total }}</div>
+      <div class="text-muted small">out of {{ exam.max_marks }}</div>
+      <div class="fw-semibold mt-1">Total Score</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm text-center py-3">
+      {% set pct = (total / exam.max_marks * 100) | round(1) %}
+      <div class="display-5 fw-bold {% if pct >= 50 %}text-success{% else %}text-danger{% endif %}">
+        {{ pct }}%
+      </div>
+      <div class="text-muted small">percentage</div>
+      <div class="fw-semibold mt-1">Score %</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm text-center py-3">
+      <div class="display-5 fw-bold text-info">{{ exam.exam_type }}</div>
+      <div class="text-muted small">exam type</div>
+      <div class="fw-semibold mt-1">Type</div>
+    </div>
+  </div>
+</div>
+
+<!-- Per-criterion breakdown -->
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white fw-semibold">Criterion-wise Breakdown</div>
+  <div class="card-body p-0">
+    {% if rubrics %}
+    <table class="table mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Criterion</th>
+          <th>Max Marks</th>
+          <th>Marks Awarded</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rubrics %}
+        {% set ev = eval_map.get(r.id) %}
+        <tr>
+          <td>
+            <div class="fw-semibold">{{ r.criterion_name }}</div>
+            {% if r.description %}<small class="text-muted">{{ r.description }}</small>{% endif %}
+          </td>
+          <td>{{ r.max_marks }}</td>
+          <td>
+            {% if ev %}
+            <span class="fw-bold {% if ev.marks_awarded >= r.max_marks * 0.5 %}text-success{% else %}text-warning{% endif %}">
+              {{ ev.marks_awarded }}
+            </span>
+            {% else %}
+            <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          <td class="text-muted small">{{ ev.remarks if ev and ev.remarks else '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot class="table-light">
+        <tr>
+          <td class="fw-bold">Total</td>
+          <td class="fw-bold">{{ exam.max_marks }}</td>
+          <td class="fw-bold emp-text-primary">{{ total }}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+    {% else %}
+    <div class="text-center py-4 text-muted">No rubric breakdown available.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

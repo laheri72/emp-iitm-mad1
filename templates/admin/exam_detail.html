@@ -74,13 +74,18 @@
       </div>
     </div>
 
-    <!-- Delete -->
-    <form method="POST" action="{{ url_for('admin.exam_delete', exam_id=exam.id) }}"
-          onsubmit="return confirm('Delete this exam and all its rubrics and slots?')">
-      <button class="btn btn-sm btn-outline-danger">
-        <i class="bi bi-trash me-1"></i>Delete Exam
-      </button>
-    </form>
+    <!-- Results + Delete -->
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('admin.exam_results', exam_id=exam.id) }}" class="btn btn-sm btn-outline-info">
+        <i class="bi bi-bar-chart me-1"></i>View Results
+      </a>
+      <form method="POST" action="{{ url_for('admin.exam_delete', exam_id=exam.id) }}"
+            onsubmit="return confirm('Delete this exam and all its rubrics and slots?')">
+        <button class="btn btn-sm btn-outline-danger">
+          <i class="bi bi-trash me-1"></i>Delete Exam
+        </button>
+      </form>
+    </div>
 
   </div>
 
