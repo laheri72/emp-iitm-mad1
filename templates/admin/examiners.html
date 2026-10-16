@@ -9,6 +9,17 @@
   </span>
 </div>
 
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body">
+    <form method="GET" class="d-flex gap-2">
+      <input type="text" class="form-control" name="q"
+             value="{{ q }}" placeholder="Search by name or email..." />
+      <button class="btn emp-btn-primary">Search</button>
+      {% if q %}<a href="{{ url_for('admin.examiners') }}" class="btn btn-outline-secondary">Clear</a>{% endif %}
+    </form>
+  </div>
+</div>
+
 <div class="card border-0 shadow-sm">
   <div class="card-body p-0">
     {% if examiners %}

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Change Examiner — Admin{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('admin.all_slots') }}" class="text-decoration-none text-muted small">
+    ← Back to all slots
+  </a>
+  <h4 class="fw-bold mt-1">Change Slot Examiner</h4>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-5">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-semibold">Slot Info</div>
+      <div class="card-body">
+        <p class="mb-1"><span class="text-muted small">Exam</span><br>{{ slot.examination.exam_name }}</p>
+        <p class="mb-1 mt-2"><span class="text-muted small">Date</span><br>
+          {{ slot.date.strftime('%d %b %Y') }},
+          {{ slot.start_time.strftime('%H:%M') }} – {{ slot.end_time.strftime('%H:%M') }}
+        </p>
+        <p class="mb-0 mt-2"><span class="text-muted small">Current Examiner</span><br>
+          <span class="fw-semibold">{{ slot.examiner.name }}</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-semibold">Reassign To</div>
+      <div class="card-body">
+        {% if examiners %}
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label">Select Approved Examiner</label>
+            <select class="form-select" name="examiner_id" required>
+              <option value="">— pick one —</option>
+              {% for e in examiners %}
+              <option value="{{ e.id }}" {% if e.id == slot.examiner_id %}selected{% endif %}>
+                {{ e.name }} ({{ e.email }})
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn emp-btn-primary"
+                  onclick="return confirm('Reassign this slot?')">Save</button>
+        </form>
+        {% else %}
+        <p class="text-muted mb-0">No approved examiners available.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

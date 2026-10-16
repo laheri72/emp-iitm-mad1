@@ -109,8 +109,12 @@ def course_delete(course_id):
 @login_required
 @admin_required
 def exams():
-    all_exams = Examination.query.order_by(Examination.created_at.desc()).all()
-    return render_template('admin/exams.html', exams=all_exams)
+    q = request.args.get('q', '').strip()
+    query = Examination.query
+    if q:
+        query = query.filter(Examination.exam_name.ilike(f'%{q}%'))
+    all_exams = query.order_by(Examination.created_at.desc()).all()
+    return render_template('admin/exams.html', exams=all_exams, q=q)
 
 
 @admin_bp.route('/exams/new', methods=['GET', 'POST'])
@@ -282,8 +286,12 @@ def rubric_delete(rubric_id):
 @login_required
 @admin_required
 def examiners():
-    all_examiners = User.query.filter_by(role='examiner').order_by(User.created_at.desc()).all()
-    return render_template('admin/examiners.html', examiners=all_examiners)
+    q = request.args.get('q', '').strip()
+    query = User.query.filter_by(role='examiner')
+    if q:
+        query = query.filter(User.name.ilike(f'%{q}%') | User.email.ilike(f'%{q}%'))
+    all_examiners = query.order_by(User.created_at.desc()).all()
+    return render_template('admin/examiners.html', examiners=all_examiners, q=q)
 
 
 @admin_bp.route('/examiners/<int:user_id>/approve', methods=['POST'])
@@ -357,3 +365,110 @@ def all_bookings():
     bookings = query.order_by(Booking.booking_date.desc()).all()
     return render_template('admin/all_bookings.html', bookings=bookings, q=q)
 
+
+# ── all slots (admin overview) ────────────────────────────────────────────────
+
+@admin_bp.route('/slots')
+@login_required
+@admin_required
+def all_slots():
+    q = request.args.get('q', '').strip()
+    exam_id = request.args.get('exam_id', type=int)
+
+    query = ExaminationSlot.query
+    if exam_id:
+        query = query.filter_by(exam_id=exam_id)
+    if q:
+        # search by examiner name
+        query = query.join(User, ExaminationSlot.examiner_id == User.id).filter(
+            User.name.ilike(f'%{q}%')
+        )
+
+    slots = query.order_by(ExaminationSlot.date.desc()).all()
+    exams_list = Examination.query.order_by(Examination.exam_name).all()
+    return render_template('admin/all_slots.html', slots=slots, exams_list=exams_list,
+                           q=q, exam_id=exam_id)
+
+
+# ── reschedule a booking ──────────────────────────────────────────────────────
+
+@admin_bp.route('/bookings/<int:booking_id>/reschedule', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def reschedule_booking(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    exam = booking.slot.examination
+
+    # only show slots from the same exam that still have seats (and aren't the current slot)
+    available_slots = (
+        ExaminationSlot.query
+        .filter_by(exam_id=exam.id)
+        .filter(ExaminationSlot.id != booking.slot_id)
+        .filter(ExaminationSlot.available_seats > 0)
+        .filter(ExaminationSlot.status == 'Available')
+        .order_by(ExaminationSlot.date)
+        .all()
+    )
+
+    if request.method == 'POST':
+        new_slot_id = request.form.get('new_slot_id', type=int)
+        if not new_slot_id:
+            flash('Please select a slot.', 'danger')
+            return render_template('admin/booking_reschedule.html',
+                                   booking=booking, slots=available_slots)
+
+        new_slot = ExaminationSlot.query.get_or_404(new_slot_id)
+        if new_slot.exam_id != exam.id:
+            flash('Invalid slot selected.', 'danger')
+            return redirect(url_for('admin.all_bookings'))
+
+        old_slot = booking.slot
+
+        # give back a seat to the old slot
+        old_slot.available_seats += 1
+        if old_slot.status == 'Full' and old_slot.available_seats > 0:
+            old_slot.status = 'Available'
+
+        # take a seat from the new slot
+        new_slot.available_seats -= 1
+        if new_slot.available_seats <= 0:
+            new_slot.status = 'Full'
+
+        booking.slot_id = new_slot_id
+        db.session.commit()
+        flash(f'Booking rescheduled to {new_slot.date.strftime("%d %b %Y")}.', 'success')
+        return redirect(url_for('admin.all_bookings'))
+
+    return render_template('admin/booking_reschedule.html',
+                           booking=booking, slots=available_slots)
+
+
+# ── change examiner on a slot ─────────────────────────────────────────────────
+
+@admin_bp.route('/slots/<int:slot_id>/change-examiner', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def change_slot_examiner(slot_id):
+    slot = ExaminationSlot.query.get_or_404(slot_id)
+    approved_examiners = (
+        User.query
+        .filter_by(role='examiner', is_approved=True, is_active=True)
+        .order_by(User.name)
+        .all()
+    )
+
+    if request.method == 'POST':
+        new_examiner_id = request.form.get('examiner_id', type=int)
+        if not new_examiner_id:
+            flash('Please select an examiner.', 'danger')
+            return render_template('admin/slot_change_examiner.html',
+                                   slot=slot, examiners=approved_examiners)
+
+        slot.examiner_id = new_examiner_id
+        db.session.commit()
+        new_examiner = User.query.get(new_examiner_id)
+        flash(f'Slot reassigned to {new_examiner.name}.', 'success')
+        return redirect(url_for('admin.all_slots'))
+
+    return render_template('admin/slot_change_examiner.html',
+                           slot=slot, examiners=approved_examiners)

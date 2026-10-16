@@ -137,3 +137,38 @@ admin side:
 next: Phase 5 — admin power features (reschedule, change examiner, search across everything)
 
 ---
+
+## 16 Oct 2026
+
+phase 5 done today — admin management features.
+
+two bugs i noticed and fixed first:
+- examiner dashboard had `href="#"` on both the "create slot" and "view" buttons, so they did nothing.
+  wired them to the actual routes (`examiner.slot_new` and `examiner.slot_bookings`). silly oversight.
+
+main things added:
+
+search on exams and examiners list:
+- `/admin/exams?q=` filters by exam name using ilike
+- `/admin/examiners?q=` filters by name or email — same pattern as students already had
+
+all slots page:
+- `/admin/slots` — see every slot across all exams in one table
+- can filter by exam (dropdown) or search by examiner name
+- "change examiner" button on each row takes you to the reassign form
+
+reschedule booking:
+- `/admin/bookings/<id>/reschedule` — shows current booking info + radio list of other available
+  slots from the same exam
+- on submit: old slot gets its seat back (and flips back to Available if it was Full),
+  new slot loses a seat (flips to Full if needed)
+- only shows slots that are 'Available' and have seats — keeps it clean
+
+change slot examiner:
+- `/admin/slots/<id>/change-examiner` — dropdown of approved+active examiners
+- simple reassign, no complex logic needed
+
+nav:
+- added "All Slots" to the Users dropdown in navbar, right above All Bookings
+
+---

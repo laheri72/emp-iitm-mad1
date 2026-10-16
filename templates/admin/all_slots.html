@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}All Slots — Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0">All Examination Slots</h4>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body">
+    <form method="GET" class="row g-2 align-items-end">
+      <div class="col-md-5">
+        <input type="text" class="form-control" name="q"
+               value="{{ q }}" placeholder="Search by examiner name..." />
+      </div>
+      <div class="col-md-4">
+        <select class="form-select" name="exam_id">
+          <option value="">All exams</option>
+          {% for e in exams_list %}
+          <option value="{{ e.id }}" {% if exam_id == e.id %}selected{% endif %}>{{ e.exam_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button class="btn emp-btn-primary">Filter</button>
+        {% if q or exam_id %}<a href="{{ url_for('admin.all_slots') }}" class="btn btn-outline-secondary">Clear</a>{% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    {% if slots %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Exam</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Examiner</th>
+            <th>Capacity</th>
+            <th>Available</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in slots %}
+          <tr>
+            <td class="fw-semibold">{{ s.examination.exam_name }}</td>
+            <td>{{ s.date.strftime('%d %b %Y') }}</td>
+            <td>{{ s.start_time.strftime('%H:%M') }} – {{ s.end_time.strftime('%H:%M') }}</td>
+            <td>{{ s.examiner.name }}</td>
+            <td>{{ s.max_capacity }}</td>
+            <td>
+              <span class="badge {% if s.available_seats == 0 %}bg-danger{% else %}bg-success{% endif %}">
+                {{ s.available_seats }}
+              </span>
+            </td>
+            <td>
+              <span class="badge
+                {% if s.status == 'Available' %}bg-success
+                {% elif s.status == 'Full' %}bg-warning text-dark
+                {% elif s.status == 'Cancelled' %}bg-secondary
+                {% else %}bg-info{% endif %}">
+                {{ s.status }}
+              </span>
+            </td>
+            <td>
+              <a href="{{ url_for('admin.change_slot_examiner', slot_id=s.id) }}"
+                 class="btn btn-sm btn-outline-secondary">Change Examiner</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+      {% if q or exam_id %}No slots match your filter.{% else %}No slots created yet.{% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

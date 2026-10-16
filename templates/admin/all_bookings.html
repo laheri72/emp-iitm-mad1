@@ -31,6 +31,7 @@
             <th>Booked On</th>
             <th>Status</th>
             <th>Score</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -52,6 +53,12 @@
             <td>
               {% if b.evaluations %}
               {{ b.evaluations | sum(attribute='marks_awarded') }} / {{ b.slot.examination.max_marks }}
+              {% else %}—{% endif %}
+            </td>
+            <td>
+              {% if b.status == 'Booked' %}
+              <a href="{{ url_for('admin.reschedule_booking', booking_id=b.id) }}"
+                 class="btn btn-sm btn-outline-secondary">Reschedule</a>
               {% else %}—{% endif %}
             </td>
           </tr>
