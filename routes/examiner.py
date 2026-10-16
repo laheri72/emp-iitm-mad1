@@ -40,10 +40,16 @@ def dashboard():
         Booking.status == 'Booked'
     ).count() if my_slot_ids else 0
 
+    # exams where slot creation is currently open
+    open_exams = [e for e in Examination.query.filter(
+        Examination.status.in_(['Slot Creation', 'Booking Open'])
+    ).all() if e.is_slot_creation_open()]
+
     return render_template('examiner/dashboard.html',
                            my_slots=my_slots,
                            booked_count=booked_count,
-                           pending_evals=pending_evals)
+                           pending_evals=pending_evals,
+                           open_exams=open_exams)
 
 
 # ── slots ─────────────────────────────────────────────────────────────────────

@@ -43,6 +43,38 @@
   </div>
 </div>
 
+<!-- Exams open for slot creation -->
+{% if open_exams %}
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-white fw-semibold">
+    <i class="bi bi-unlock me-1 text-success"></i>
+    Exams Open for Slot Creation
+  </div>
+  <div class="card-body p-0">
+    <ul class="list-group list-group-flush">
+      {% for exam in open_exams %}
+      <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+        <div>
+          <div class="fw-semibold">{{ exam.exam_name }}</div>
+          <small class="text-muted">
+            {{ exam.course.course_code }} &bull;
+            {{ exam.exam_type }} &bull;
+            {{ exam.duration }} min
+            {% if exam.slot_creation_end %}
+            &bull; <span class="text-danger">Slot creation closes: {{ exam.slot_creation_end.strftime('%d %b, %H:%M') }}</span>
+            {% endif %}
+          </small>
+        </div>
+        <a href="{{ url_for('examiner.slot_new') }}" class="btn btn-sm emp-btn-primary ms-3">
+          <i class="bi bi-plus-circle me-1"></i>Create Slot
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endif %}
+
 <!-- My slots table -->
 <div class="card border-0 shadow-sm">
   <div class="card-header bg-white d-flex justify-content-between align-items-center">
@@ -98,7 +130,11 @@
     {% else %}
     <div class="text-center py-5 text-muted">
       <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+      {% if open_exams %}
+      No slots yet — use the section above to create one.
+      {% else %}
       No slots created yet. Check if slot creation is open.
+      {% endif %}
     </div>
     {% endif %}
   </div>
