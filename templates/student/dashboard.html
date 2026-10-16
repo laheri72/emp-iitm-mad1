@@ -108,7 +108,7 @@
               <div class="fw-semibold small">{{ booking.slot.examination.exam_name }}</div>
               <small class="text-muted">{{ booking.slot.date.strftime('%d %b %Y') }}</small>
             </div>
-            <a href="#" class="btn btn-sm btn-outline-info">View</a>
+            <a href="{{ url_for('student.result_detail', booking_id=booking.id) }}" class="btn btn-sm btn-outline-info">View</a>
           </li>
           {% endfor %}
         </ul>
