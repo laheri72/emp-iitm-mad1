@@ -1,0 +1,339 @@
+openapi: 3.0.3
+info:
+  title: Examination Management Portal (EMP) API
+  description: RESTful API for IITM BS App Dev 1 Examination Management Portal.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5000/api
+    description: Local development server
+
+paths:
+  /stats:
+    get:
+      summary: Get portal summary statistics
+      description: Returns counts of courses, examinations, examiners, students, slots, and bookings.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      courses:
+                        type: integer
+                        example: 5
+                      examinations:
+                        type: integer
+                        example: 2
+                      examiners:
+                        type: integer
+                        example: 2
+                      students:
+                        type: integer
+                        example: 1
+                      slots:
+                        type: integer
+                        example: 4
+                      bookings:
+                        type: integer
+                        example: 4
+
+  /exams:
+    get:
+      summary: List all examinations
+      description: Returns all examinations. Can be filtered by status.
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [Draft, Slot Creation, Booking Open, Closed, Completed]
+          description: Filter exams by current status
+      responses:
+        '200':
+          description: List of examinations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  count:
+                    type: integer
+                    example: 2
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ExaminationSummary'
+
+  /exams/{exam_id}:
+    get:
+      summary: Get examination details
+      description: Returns detailed examination information including rubrics and created slots.
+      parameters:
+        - name: exam_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Examination ID
+      responses:
+        '200':
+          description: Examination details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/ExaminationDetail'
+        '404':
+          description: Examination not found
+
+  /slots:
+    get:
+      summary: List examination slots
+      description: Returns time slots created across exams. Can filter by exam_id.
+      parameters:
+        - name: exam_id
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Filter slots by examination ID
+      responses:
+        '200':
+          description: List of slots
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  count:
+                    type: integer
+                    example: 4
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SlotSummary'
+
+  /slots/{slot_id}:
+    get:
+      summary: Get slot details
+      description: Returns detailed information for a specific slot including available seats and booked count.
+      parameters:
+        - name: slot_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Slot ID
+      responses:
+        '200':
+          description: Slot details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/SlotDetail'
+        '404':
+          description: Slot not found
+
+components:
+  schemas:
+    ExaminationSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 2
+        course_code:
+          type: string
+          example: MS001
+        course_name:
+          type: string
+          example: Management and Business Studies
+        exam_name:
+          type: string
+          example: Management Viva Level 1
+        exam_type:
+          type: string
+          example: Viva
+        duration_minutes:
+          type: integer
+          example: 30
+        max_marks:
+          type: integer
+          example: 50
+        status:
+          type: string
+          example: Booking Open
+        is_slot_creation_open:
+          type: boolean
+          example: false
+        is_booking_open:
+          type: boolean
+          example: true
+        slots_count:
+          type: integer
+          example: 2
+        rubrics_count:
+          type: integer
+          example: 3
+        slot_creation_start:
+          type: string
+          format: date-time
+          nullable: true
+        slot_creation_end:
+          type: string
+          format: date-time
+          nullable: true
+        booking_start:
+          type: string
+          format: date-time
+          nullable: true
+        booking_end:
+          type: string
+          format: date-time
+          nullable: true
+
+    ExaminationDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        course:
+          type: object
+          properties:
+            id:
+              type: integer
+            code:
+              type: string
+            name:
+              type: string
+        exam_name:
+          type: string
+        exam_type:
+          type: string
+        duration_minutes:
+          type: integer
+        max_marks:
+          type: integer
+        status:
+          type: string
+        rubrics:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              criterion_name:
+                type: string
+              max_marks:
+                type: integer
+              weightage:
+                type: number
+              description:
+                type: string
+        slots:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              date:
+                type: string
+                format: date
+              start_time:
+                type: string
+              end_time:
+                type: string
+              examiner_name:
+                type: string
+              max_capacity:
+                type: integer
+              available_seats:
+                type: integer
+              status:
+                type: string
+
+    SlotSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        exam_id:
+          type: integer
+        exam_name:
+          type: string
+        date:
+          type: string
+          format: date
+        start_time:
+          type: string
+        end_time:
+          type: string
+        examiner_id:
+          type: integer
+        examiner_name:
+          type: string
+        max_capacity:
+          type: integer
+        available_seats:
+          type: integer
+        status:
+          type: string
+
+    SlotDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        exam_id:
+          type: integer
+        exam_name:
+          type: string
+        course_code:
+          type: string
+        date:
+          type: string
+          format: date
+        start_time:
+          type: string
+        end_time:
+          type: string
+        examiner_id:
+          type: integer
+        examiner_name:
+          type: string
+        max_capacity:
+          type: integer
+        available_seats:
+          type: integer
+        status:
+          type: string
+        booked_count:
+          type: integer
