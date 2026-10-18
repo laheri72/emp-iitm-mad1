@@ -212,16 +212,41 @@
           </tbody>
           <tfoot class="table-light">
             <tr>
-              <td class="fw-semibold">Total</td>
+              <td class="fw-semibold">Total Rubric Marks</td>
               <td class="fw-semibold">{{ exam.rubrics | sum(attribute='max_marks') }}</td>
               <td></td><td></td>
             </tr>
           </tfoot>
         </table>
+
+        <!-- Rubric Total Marks Comparison Box -->
+        {% set r_sum = exam.rubrics | sum(attribute='max_marks') %}
+        <div class="p-3 bg-light border-top">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="fw-semibold small text-uppercase text-muted">Rubric Marks Allocation:</span>
+            <span class="fw-bold fs-6">{{ r_sum }} / {{ exam.max_marks }} marks</span>
+          </div>
+          {% if r_sum == exam.max_marks %}
+            <div class="alert alert-success py-2 px-3 mb-0 small d-flex align-items-center">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              <span>Rubrics are fully set! Total matches Exam Max Marks (<strong>{{ exam.max_marks }}</strong>).</span>
+            </div>
+          {% elif r_sum < exam.max_marks %}
+            <div class="alert alert-warning py-2 px-3 mb-0 small d-flex align-items-center">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <span>Rubrics sum to <strong>{{ r_sum }}</strong> marks. <strong>{{ exam.max_marks - r_sum }}</strong> marks remaining to reach Exam Max Marks ({{ exam.max_marks }}).</span>
+            </div>
+          {% else %}
+            <div class="alert alert-danger py-2 px-3 mb-0 small d-flex align-items-center">
+              <i class="bi bi-exclamation-octagon-fill me-2"></i>
+              <span>Warning: Rubric criteria total (<strong>{{ r_sum }}</strong>) exceeds Exam Max Marks (<strong>{{ exam.max_marks }}</strong>) by {{ r_sum - exam.max_marks }} marks!</span>
+            </div>
+          {% endif %}
+        </div>
         {% else %}
         <div class="text-center py-4 text-muted">
           <i class="bi bi-list-check fs-2 d-block mb-2"></i>
-          No rubric criteria yet. Add some so examiners know how to score.
+          No rubric criteria yet. Add criteria to set the required {{ exam.max_marks }} marks.
         </div>
         {% endif %}
       </div>

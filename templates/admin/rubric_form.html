@@ -10,7 +10,10 @@
       </a>
       <h4 class="fw-bold mb-0">{{ 'Edit Criterion' if rubric else 'Add Criterion' }}</h4>
     </div>
-    <p class="text-muted">Exam: <strong>{{ exam.exam_name }}</strong></p>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span class="text-muted">Exam: <strong>{{ exam.exam_name }}</strong></span>
+      <span class="badge bg-secondary">Exam Max Marks: {{ exam.max_marks }}</span>
+    </div>
 
     <div class="card border-0 shadow-sm">
       <div class="card-body p-4">
@@ -28,6 +31,9 @@
               <label class="form-label">Max Marks</label>
               <input type="number" class="form-control" name="max_marks"
                      value="{{ rubric.max_marks if rubric else 10 }}" min="1" required />
+              <small class="text-muted d-block mt-1">
+                Current total set: <strong>{{ exam.rubrics | sum(attribute='max_marks') }}</strong> / {{ exam.max_marks }}
+              </small>
             </div>
             <div class="col-6">
               <label class="form-label">Weightage % <span class="text-muted">(optional)</span></label>

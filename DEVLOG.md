@@ -214,3 +214,17 @@ restful api endpoints:
 all routes tested and working smoothly.
 
 ---
+
+afternoon fixes:
+- fixed duplicate booking issue: `book_slot` and `exam_slots` previously only checked for active `Booked` status,
+  which allowed a student who had already `Completed` an exam to book a second slot for that same exam.
+  cleaned up the duplicate booking from the database (restored slot seat capacity), and updated the checks in
+  `routes/student.py` and `exam_slots.html` to check for both `Booked` and `Completed` statuses.
+- rubric total marks clarity in admin:
+  - on `admin/exam_detail.html`: added a clear rubric marks allocation panel below the rubrics table showing
+    `Rubric Total / Exam Max Marks` with status alerts (matches, unassigned marks remaining, or exceeds).
+  - on `admin/exam_form.html` (edit exam): added current rubric total under the Max Marks input and an Associated
+    Rubrics card below the form showing exact breakdown and marks allocated.
+  - on `admin/rubric_form.html`: added badge showing Exam Max Marks and the current rubric sum.
+
+---

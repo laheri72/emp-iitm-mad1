@@ -56,6 +56,11 @@
               <label class="form-label">Max Marks</label>
               <input type="number" class="form-control" name="max_marks"
                      value="{{ exam.max_marks if exam else 100 }}" min="1" required />
+              {% if exam and exam.rubrics %}
+              <small class="text-muted d-block mt-1">
+                Rubrics total: <strong>{{ exam.rubrics | sum(attribute='max_marks') }}</strong> / {{ exam.max_marks }}
+              </small>
+              {% endif %}
             </div>
 
           </div>
@@ -96,6 +101,59 @@
         </form>
       </div>
     </div>
+
+    {% if exam %}
+    <!-- Rubrics overview when editing exam -->
+    <div class="card border-0 shadow-sm mt-4">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Associated Rubric Criteria</span>
+        <a href="{{ url_for('admin.exam_detail', exam_id=exam.id) }}" class="btn btn-sm btn-outline-primary">
+          Manage Rubrics
+        </a>
+      </div>
+      <div class="card-body p-0">
+        {% if exam.rubrics %}
+        <table class="table table-sm table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Criterion</th>
+              <th>Max Marks</th>
+              <th>Weightage</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in exam.rubrics %}
+            <tr>
+              <td>{{ r.criterion_name }}</td>
+              <td>{{ r.max_marks }}</td>
+              <td>{{ r.weightage or '—' }}{% if r.weightage %}%{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% set r_tot = exam.rubrics | sum(attribute='max_marks') %}
+        <div class="p-3 bg-light border-top">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-semibold small text-uppercase text-muted">Total Marks Set in Rubrics:</span>
+            <span class="fw-bold fs-6">{{ r_tot }} / {{ exam.max_marks }}</span>
+          </div>
+          {% if r_tot == exam.max_marks %}
+            <small class="text-success d-block mt-1"><i class="bi bi-check-circle-fill me-1"></i>Rubrics fully match total marks ({{ exam.max_marks }}).</small>
+          {% elif r_tot < exam.max_marks %}
+            <small class="text-warning d-block mt-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>Rubrics sum to {{ r_tot }} marks ({{ exam.max_marks - r_tot }} unassigned marks remaining).</small>
+          {% else %}
+            <small class="text-danger d-block mt-1"><i class="bi bi-exclamation-octagon-fill me-1"></i>Rubrics sum to {{ r_tot }} marks (exceeds {{ exam.max_marks }} by {{ r_tot - exam.max_marks }}).</small>
+          {% endif %}
+        </div>
+        {% else %}
+        <div class="p-3 text-center text-muted small">
+          No rubric criteria defined yet. <a href="{{ url_for('admin.exam_detail', exam_id=exam.id) }}">Add criteria here</a>.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
   </div>
 </div>
 {% endblock %}

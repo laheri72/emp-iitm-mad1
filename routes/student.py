@@ -70,11 +70,11 @@ def exam_slots(exam_id):
         flash('Booking is not open for this exam.', 'warning')
         return redirect(url_for('student.browse_exams'))
 
-    # check if already booked for this exam
+    # check if already booked or completed for this exam
     already_booked = Booking.query.join(ExaminationSlot).filter(
         ExaminationSlot.exam_id == exam_id,
         Booking.student_id == current_user.id,
-        Booking.status == 'Booked'
+        Booking.status.in_(['Booked', 'Completed'])
     ).first()
 
     available_slots = ExaminationSlot.query.filter_by(
@@ -104,15 +104,18 @@ def book_slot(slot_id):
         flash('This slot is full or unavailable.', 'danger')
         return redirect(url_for('student.exam_slots', exam_id=exam.id))
 
-    # prevent duplicate booking for the same exam
+    # prevent duplicate booking for the same exam (cannot book if already Booked or Completed)
     existing = Booking.query.join(ExaminationSlot).filter(
         ExaminationSlot.exam_id == exam.id,
         Booking.student_id == current_user.id,
-        Booking.status == 'Booked'
+        Booking.status.in_(['Booked', 'Completed'])
     ).first()
 
     if existing:
-        flash('You already have a booking for this exam.', 'warning')
+        if existing.status == 'Completed':
+            flash('You have already completed this examination.', 'info')
+        else:
+            flash('You already have an active booking for this exam.', 'warning')
         return redirect(url_for('student.exam_slots', exam_id=exam.id))
 
     # create booking and decrement seat count

@@ -14,13 +14,19 @@
 </p>
 
 {% if already_booked %}
-<div class="alert alert-success d-flex align-items-center gap-2">
-  <i class="bi bi-check-circle-fill"></i>
+<div class="alert {% if already_booked.status == 'Completed' %}alert-info{% else %}alert-success{% endif %} d-flex align-items-center gap-2">
+  <i class="bi {% if already_booked.status == 'Completed' %}bi-info-circle-fill{% else %}bi-check-circle-fill{% endif %}"></i>
   <div>
-    You already have a booking for this exam on
-    <strong>{{ already_booked.slot.date.strftime('%d %b %Y') }}</strong>
-    at <strong>{{ already_booked.slot.start_time.strftime('%H:%M') }}</strong>.
-    <a href="{{ url_for('student.my_bookings') }}" class="alert-link ms-2">View my bookings →</a>
+    {% if already_booked.status == 'Completed' %}
+      You have already completed this examination on
+      <strong>{{ already_booked.slot.date.strftime('%d %b %Y') }}</strong>.
+      <a href="{{ url_for('student.result_detail', booking_id=already_booked.id) }}" class="alert-link ms-2">View published result →</a>
+    {% else %}
+      You already have a booking for this exam on
+      <strong>{{ already_booked.slot.date.strftime('%d %b %Y') }}</strong>
+      at <strong>{{ already_booked.slot.start_time.strftime('%H:%M') }}</strong>.
+      <a href="{{ url_for('student.my_bookings') }}" class="alert-link ms-2">View my bookings →</a>
+    {% endif %}
   </div>
 </div>
 {% endif %}
