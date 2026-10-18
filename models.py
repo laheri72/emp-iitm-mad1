@@ -94,24 +94,39 @@ class Examination(db.Model):
     slots = db.relationship('ExaminationSlot', backref='examination', lazy=True)
 
     def is_slot_creation_open(self):
+        # status is the master switch — admin sets it manually
         if self.status not in ('Slot Creation', 'Booking Open'):
             return False
-        now = datetime.now()
-        if self.slot_creation_start and now < self.slot_creation_start:
-            return False
-        if self.slot_creation_end and now > self.slot_creation_end:
+        # end date auto-closes it if set and passed (like an expiry)
+        # start date is NOT checked — if admin set the status, trust that intent
+        if self.slot_creation_end and datetime.now() > self.slot_creation_end:
             return False
         return True
 
     def is_booking_open(self):
         if self.status != 'Booking Open':
             return False
-        now = datetime.now()
-        if self.booking_start and now < self.booking_start:
-            return False
-        if self.booking_end and now > self.booking_end:
+        # same logic — end date is expiry only, start date doesn't block
+        if self.booking_end and datetime.now() > self.booking_end:
             return False
         return True
+
+    # helpers for the admin detail page to show warnings
+    @property
+    def slot_creation_expired(self):
+        return bool(self.slot_creation_end and datetime.now() > self.slot_creation_end)
+
+    @property
+    def booking_expired(self):
+        return bool(self.booking_end and datetime.now() > self.booking_end)
+
+    @property
+    def booking_not_started(self):
+        return bool(self.booking_start and datetime.now() < self.booking_start)
+
+    @property
+    def slot_creation_not_started(self):
+        return bool(self.slot_creation_start and datetime.now() < self.slot_creation_start)
 
     def __repr__(self):
         return f'<Examination {self.exam_name} [{self.status}]>'

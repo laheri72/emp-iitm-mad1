@@ -32,7 +32,23 @@ def dashboard():
         'total_bookings': Booking.query.count(),
         'pending_examiners': User.query.filter_by(role='examiner', is_approved=False).count(),
     }
-    return render_template('admin/dashboard.html', stats=stats)
+
+    # chart data for visual analytics
+    booking_chart = {
+        'Booked': Booking.query.filter_by(status='Booked').count(),
+        'Completed': Booking.query.filter_by(status='Completed').count(),
+        'Cancelled': Booking.query.filter_by(status='Cancelled').count(),
+    }
+    exam_chart = {
+        'Draft': Examination.query.filter_by(status='Draft').count(),
+        'Slot Creation': Examination.query.filter_by(status='Slot Creation').count(),
+        'Booking Open': Examination.query.filter_by(status='Booking Open').count(),
+        'Closed': Examination.query.filter_by(status='Closed').count(),
+        'Completed': Examination.query.filter_by(status='Completed').count(),
+    }
+
+    return render_template('admin/dashboard.html', stats=stats,
+                           booking_chart=booking_chart, exam_chart=exam_chart)
 
 
 # ── courses ───────────────────────────────────────────────────────────────────
@@ -205,8 +221,26 @@ def exam_set_status(exam_id):
         return redirect(url_for('admin.exam_detail', exam_id=exam_id))
 
     exam.status = new_status
+    now = datetime.now()
+    note = ''
+
+    # manual status override logic: ensure admin intent is not blocked by stale dates
+    if new_status == 'Slot Creation':
+        if exam.slot_creation_start and exam.slot_creation_start > now:
+            exam.slot_creation_start = now
+        if exam.slot_creation_end and exam.slot_creation_end <= now:
+            exam.slot_creation_end = None
+            note = ' (Expired slot creation deadline was cleared)'
+
+    elif new_status == 'Booking Open':
+        if exam.booking_start and exam.booking_start > now:
+            exam.booking_start = now
+        if exam.booking_end and exam.booking_end <= now:
+            exam.booking_end = None
+            note = ' (Expired booking deadline was cleared)'
+
     db.session.commit()
-    flash(f'Exam status changed to "{new_status}".', 'success')
+    flash(f'Exam status changed to "{new_status}".{note}', 'success')
     return redirect(url_for('admin.exam_detail', exam_id=exam_id))
 
 

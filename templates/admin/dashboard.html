@@ -81,11 +81,37 @@
   <i class="bi bi-exclamation-triangle-fill me-2"></i>
   <div>
     <strong>{{ stats.pending_examiners }} examiner(s)</strong> are waiting for approval.
-    <!-- link to examiner approval page — coming in Phase 2 -->
-    <a href="#" class="alert-link ms-1">Review now</a>
+    <a href="{{ url_for('admin.examiners') }}" class="alert-link ms-1">Review now</a>
   </div>
 </div>
 {% endif %}
+
+<!-- Analytics Charts -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-pie-chart me-1 text-primary"></i>
+        Booking Status Distribution
+      </div>
+      <div class="card-body d-flex justify-content-center align-items-center" style="min-height: 250px;">
+        <canvas id="bookingChart" style="max-height: 230px;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-bar-chart me-1 text-success"></i>
+        Examinations by Stage
+      </div>
+      <div class="card-body d-flex justify-content-center align-items-center" style="min-height: 250px;">
+        <canvas id="examChart" style="max-height: 230px;"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Quick action tiles -->
 <h6 class="fw-semibold mt-4 mb-3 text-muted text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">
@@ -125,4 +151,61 @@
     </a>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script>
+  // Bookings doughnut chart
+  const bCtx = document.getElementById('bookingChart').getContext('2d');
+  new Chart(bCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Booked', 'Completed', 'Cancelled'],
+      datasets: [{
+        data: [{{ booking_chart.Booked }}, {{ booking_chart.Completed }}, {{ booking_chart.Cancelled }}],
+        backgroundColor: ['#ffc107', '#198754', '#6c757d'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+
+  // Examinations bar chart
+  const eCtx = document.getElementById('examChart').getContext('2d');
+  new Chart(eCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Draft', 'Slot Creation', 'Booking Open', 'Closed', 'Completed'],
+      datasets: [{
+        label: 'Exams',
+        data: [
+          {{ exam_chart.Draft }},
+          {{ exam_chart['Slot Creation'] }},
+          {{ exam_chart['Booking Open'] }},
+          {{ exam_chart.Closed }},
+          {{ exam_chart.Completed }}
+        ],
+        backgroundColor: ['#adb5bd', '#ffc107', '#198754', '#dc3545', '#0dcaf0'],
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0 } }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+</script>
 {% endblock %}

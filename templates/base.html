@@ -120,9 +120,19 @@
             </span>
           </li>
           <li class="nav-item me-3">
+            {% if current_user.is_student %}
+            <a class="nav-link text-light p-0" href="{{ url_for('student.profile') }}" title="Edit Profile">
+              <i class="bi bi-person-circle me-1"></i>{{ current_user.name }}
+            </a>
+            {% elif current_user.is_examiner %}
+            <a class="nav-link text-light p-0" href="{{ url_for('examiner.profile') }}" title="Edit Profile">
+              <i class="bi bi-person-circle me-1"></i>{{ current_user.name }}
+            </a>
+            {% else %}
             <span class="navbar-text text-light">
               <i class="bi bi-person-circle me-1"></i>{{ current_user.name }}
             </span>
+            {% endif %}
           </li>
           <li class="nav-item">
             <a class="btn btn-outline-light btn-sm" href="{{ url_for('auth.logout') }}">

@@ -2,17 +2,48 @@
 {% block title %}Result — {{ exam.exam_name }}{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center gap-2 mb-4">
-  <a href="{{ url_for('student.my_bookings') }}" class="btn btn-sm btn-outline-secondary">
-    <i class="bi bi-arrow-left"></i>
-  </a>
-  <div>
-    <h4 class="fw-bold mb-0">{{ exam.exam_name }}</h4>
-    <small class="text-muted">
-      {{ booking.slot.date.strftime('%d %b %Y') }} ·
-      {{ booking.slot.start_time.strftime('%H:%M') }}–{{ booking.slot.end_time.strftime('%H:%M') }} ·
-      Examiner: {{ booking.slot.examiner.name }}
-    </small>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex align-items-center gap-2">
+    <a href="{{ url_for('student.my_bookings') }}" class="btn btn-sm btn-outline-secondary no-print">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+      <h4 class="fw-bold mb-0">{{ exam.exam_name }}</h4>
+      <small class="text-muted">
+        {{ exam.course.course_code }} — {{ exam.course.course_name }}
+      </small>
+    </div>
+  </div>
+  <button onclick="window.print()" class="btn btn-sm btn-outline-primary no-print">
+    <i class="bi bi-printer me-1"></i>Print Scorecard
+  </button>
+</div>
+
+<!-- Student and Exam Info Card -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+    <span>Examination Scorecard</span>
+    <span class="badge bg-success">Published</span>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-sm-6 col-md-3">
+        <small class="text-muted d-block">Student Name</small>
+        <strong>{{ booking.student.name }}</strong>
+      </div>
+      <div class="col-sm-6 col-md-3">
+        <small class="text-muted d-block">Student Email</small>
+        <strong>{{ booking.student.email }}</strong>
+      </div>
+      <div class="col-sm-6 col-md-3">
+        <small class="text-muted d-block">Exam Date & Time</small>
+        <span>{{ booking.slot.date.strftime('%d %b %Y') }}, {{ booking.slot.start_time.strftime('%H:%M') }}–{{ booking.slot.end_time.strftime('%H:%M') }}</span>
+      </div>
+      <div class="col-sm-6 col-md-3">
+        <small class="text-muted d-block">Evaluated By</small>
+        <span>{{ booking.slot.examiner.name }}</span>
+      </div>
+    </div>
   </div>
 </div>
 

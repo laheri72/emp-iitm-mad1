@@ -280,3 +280,40 @@ def evaluate_booking(booking_id):
 
     return render_template('examiner/evaluation_form.html',
                            booking=booking, rubrics=rubrics, existing=existing)
+
+
+# ── profile ───────────────────────────────────────────────────────────────────
+
+@examiner_bp.route('/profile', methods=['GET', 'POST'])
+@login_required
+@examiner_required
+def profile():
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        department = request.form.get('department', '').strip()
+        phone = request.form.get('phone', '').strip()
+        new_pw = request.form.get('new_password', '').strip()
+        confirm_pw = request.form.get('confirm_password', '').strip()
+
+        if not name:
+            flash('Name is required.', 'danger')
+            return render_template('examiner/profile.html')
+
+        current_user.name = name
+        current_user.department = department
+        current_user.phone = phone
+
+        if new_pw:
+            if len(new_pw) < 6:
+                flash('New password must be at least 6 characters.', 'danger')
+                return render_template('examiner/profile.html')
+            if new_pw != confirm_pw:
+                flash('Passwords do not match.', 'danger')
+                return render_template('examiner/profile.html')
+            current_user.set_password(new_pw)
+
+        db.session.commit()
+        flash('Profile updated successfully.', 'success')
+        return redirect(url_for('examiner.profile'))
+
+    return render_template('examiner/profile.html')

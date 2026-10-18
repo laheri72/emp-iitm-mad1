@@ -172,3 +172,45 @@ nav:
 - added "All Slots" to the Users dropdown in navbar, right above All Bookings
 
 ---
+## 18 Oct 2026
+
+phase 6 — polish, profile editing, analytics, and fixing the timeline vs manual status conflict.
+
+first, tackled the manual status vs timeline scheduling problem:
+- realized a subtle but big design flaw earlier: if admin manually changed status to 'Slot Creation'
+  or 'Booking Open', but the date schedule had already expired or was set in the future, the
+  examiner or student couldn't see the exam. admin was clicking 'Booking Open' and wondering why
+  students still saw nothing.
+- fixed the logic properly:
+  1. `models.py`: start dates do NOT block if admin explicitly opened the status. end dates act
+     as auto-closing deadlines when set.
+  2. `routes/admin.py` in `exam_set_status`: when admin manually sets status to 'Slot Creation' or
+     'Booking Open', any stale/expired end date in the past gets cleared so it doesn't immediately
+     block users, and future start dates sync to now. admin intent is respected.
+  3. `templates/admin/exam_detail.html`: added a live access status panel showing whether slot creation
+     and student bookings are active right now with clear badges and warnings.
+
+student features:
+- added profile edit route (`/student/profile`) so students can update their name, phone, and password
+- added examination search (`/student/exams?q=`) so students can filter open exams by title or course code
+- added cancellation deadline check: students cannot cancel a booking after the exam's booking deadline
+- enhanced the results page (`/student/results/<id>`) into a formal printable scorecard with student info,
+  exam metadata, and `@media print` CSS so it prints cleanly as a report
+
+examiner features:
+- added profile edit route (`/examiner/profile`) for name, department, phone, and password updates
+- updated base navbar so clicking the user name opens their respective profile page
+
+admin analytics & visual polish:
+- added Chart.js visualizations on admin dashboard:
+  - booking status distribution (doughnut chart: booked, completed, cancelled)
+  - examinations by lifecycle stage (bar chart: draft, slot creation, booking open, closed, completed)
+- fixed pending examiner review link on the admin dashboard alert
+
+restful api endpoints:
+- created `routes/api.py` with `/api/exams`, `/api/exams/<id>`, `/api/slots`, `/api/slots/<id>`, and `/api/stats`
+- registered at `/api` — returns clean json for external integration or frontend consumption
+
+all routes tested and working smoothly.
+
+---

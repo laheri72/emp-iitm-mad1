@@ -50,9 +50,10 @@ EMP/
 ├── instance/        ← auto-created, holds emp.db
 ├── routes/
 │   ├── auth.py      ← login / register / logout
-│   ├── admin.py     ← admin routes
-│   ├── examiner.py  ← examiner routes
-│   └── student.py   ← student routes
+│   ├── admin.py     ← admin routes & analytics
+│   ├── examiner.py  ← examiner routes & profile
+│   ├── student.py   ← student routes, booking, scorecard & profile
+│   └── api.py       ← RESTful JSON API endpoints
 ├── templates/
 │   ├── base.html
 │   ├── auth/
@@ -62,6 +63,16 @@ EMP/
 └── static/
     └── css/style.css
 ```
+
+## RESTful API Endpoints
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/stats` | GET | Portal overview counts (courses, exams, slots, bookings) |
+| `/api/exams` | GET | List examinations (`?status=` filter available) |
+| `/api/exams/<id>` | GET | Detailed exam info with rubric criteria and slot schedule |
+| `/api/slots` | GET | List examination slots (`?exam_id=` filter available) |
+| `/api/slots/<id>` | GET | Slot details with remaining capacity and booked count |
 
 ## Key Design Decisions
 

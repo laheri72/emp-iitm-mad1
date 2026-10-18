@@ -36,21 +36,100 @@
           <tr><th>Max Marks</th><td>{{ exam.max_marks }}</td></tr>
           <tr><th>Slot Creation</th>
             <td>
-              {% if exam.slot_creation_start %}
+              {% if exam.slot_creation_start and exam.slot_creation_end %}
                 {{ exam.slot_creation_start.strftime('%d %b %Y %H:%M') }} →
                 {{ exam.slot_creation_end.strftime('%d %b %H:%M') }}
+              {% elif exam.slot_creation_start %}
+                From {{ exam.slot_creation_start.strftime('%d %b %Y %H:%M') }} (No deadline)
+              {% elif exam.slot_creation_end %}
+                Until {{ exam.slot_creation_end.strftime('%d %b %Y %H:%M') }}
               {% else %}—{% endif %}
             </td>
           </tr>
           <tr><th>Booking Window</th>
             <td>
-              {% if exam.booking_start %}
+              {% if exam.booking_start and exam.booking_end %}
                 {{ exam.booking_start.strftime('%d %b %Y %H:%M') }} →
                 {{ exam.booking_end.strftime('%d %b %H:%M') }}
+              {% elif exam.booking_start %}
+                From {{ exam.booking_start.strftime('%d %b %Y %H:%M') }} (No deadline)
+              {% elif exam.booking_end %}
+                Until {{ exam.booking_end.strftime('%d %b %Y %H:%M') }}
               {% else %}—{% endif %}
             </td>
           </tr>
         </table>
+      </div>
+    </div>
+
+    <!-- Effective access status (what's actually happening right now) -->
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header bg-white fw-semibold">Live Access Status</div>
+      <div class="card-body">
+
+        <!-- Slot creation -->
+        <div class="d-flex align-items-start gap-2 mb-3">
+          {% if exam.is_slot_creation_open() %}
+          <span class="badge bg-success mt-1">OPEN</span>
+          <div>
+            <div class="fw-semibold small">Examiners can create slots</div>
+            {% if exam.slot_creation_end %}
+            <small class="text-muted">Auto-closes: {{ exam.slot_creation_end.strftime('%d %b %Y, %H:%M') }}</small>
+            {% else %}
+            <small class="text-muted">No end date set — stays open until status changes</small>
+            {% endif %}
+          </div>
+          {% else %}
+          <span class="badge bg-secondary mt-1">CLOSED</span>
+          <div>
+            <div class="fw-semibold small">Slot creation is closed</div>
+            {% if exam.slot_creation_expired %}
+            <small class="text-danger">
+              <i class="bi bi-exclamation-triangle me-1"></i>
+              End date passed ({{ exam.slot_creation_end.strftime('%d %b, %H:%M') }}) — extend it or set status manually
+            </small>
+            {% elif exam.status not in ('Slot Creation', 'Booking Open') %}
+            <small class="text-muted">Status is "{{ exam.status }}"</small>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+
+        <hr class="my-2">
+
+        <!-- Booking -->
+        <div class="d-flex align-items-start gap-2">
+          {% if exam.is_booking_open() %}
+          <span class="badge bg-success mt-1">OPEN</span>
+          <div>
+            <div class="fw-semibold small">Students can book slots</div>
+            {% if exam.booking_end %}
+            <small class="text-muted">Auto-closes: {{ exam.booking_end.strftime('%d %b %Y, %H:%M') }}</small>
+            {% else %}
+            <small class="text-muted">No end date set — stays open until status changes</small>
+            {% endif %}
+          </div>
+          {% else %}
+          <span class="badge bg-secondary mt-1">CLOSED</span>
+          <div>
+            <div class="fw-semibold small">Booking is closed</div>
+            {% if exam.booking_expired %}
+            <small class="text-danger">
+              <i class="bi bi-exclamation-triangle me-1"></i>
+              End date passed ({{ exam.booking_end.strftime('%d %b, %H:%M') }}) — extend it or set status manually
+            </small>
+            {% elif exam.booking_not_started and exam.status == 'Booking Open' %}
+            <small class="text-warning">
+              <i class="bi bi-info-circle me-1"></i>
+              Start date ({{ exam.booking_start.strftime('%d %b, %H:%M') }}) is in the future — but booking is NOW open because status is "Booking Open"
+            </small>
+            {% elif exam.status != 'Booking Open' %}
+            <small class="text-muted">Status is "{{ exam.status }}"</small>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+
       </div>
     </div>
 
@@ -59,7 +138,8 @@
       <div class="card-header bg-white fw-semibold">Change Status</div>
       <div class="card-body">
         <p class="text-muted small mb-3">
-          Current: <strong>{{ exam.status }}</strong>. Move the exam to the next stage.
+          Status is the master switch. Setting it overrides date windows.<br>
+          End dates still auto-close the window when they pass.
         </p>
         <form method="POST" action="{{ url_for('admin.exam_set_status', exam_id=exam.id) }}">
           <div class="d-flex gap-2 flex-wrap">

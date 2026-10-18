@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from functools import wraps
+from datetime import datetime
 from models import db, Examination, ExaminationSlot, Booking
 
 student_bp = Blueprint('student', __name__)
@@ -47,10 +48,16 @@ def dashboard():
 @login_required
 @student_required
 def browse_exams():
+    q = request.args.get('q', '').strip()
     # only show exams where booking is actually open right now
     open_exams = [e for e in Examination.query.filter_by(status='Booking Open').all()
                   if e.is_booking_open()]
-    return render_template('student/exams.html', exams=open_exams)
+    if q:
+        open_exams = [
+            e for e in open_exams
+            if q.lower() in e.exam_name.lower() or q.lower() in e.course.course_code.lower()
+        ]
+    return render_template('student/exams.html', exams=open_exams, q=q)
 
 
 @student_bp.route('/exams/<int:exam_id>/slots')
@@ -150,6 +157,12 @@ def cancel_booking(booking_id):
         flash('This booking cannot be cancelled.', 'warning')
         return redirect(url_for('student.my_bookings'))
 
+    # deadline check: student cannot cancel after booking deadline
+    exam = booking.slot.examination
+    if exam.booking_end and datetime.now() > exam.booking_end:
+        flash('Cannot cancel — the booking deadline has passed.', 'warning')
+        return redirect(url_for('student.my_bookings'))
+
     booking.status = 'Cancelled'
 
     # give the seat back
@@ -188,4 +201,39 @@ def result_detail(booking_id):
                            rubrics=rubrics,
                            eval_map=eval_map,
                            total=total)
+
+
+# ── profile ───────────────────────────────────────────────────────────────────
+
+@student_bp.route('/profile', methods=['GET', 'POST'])
+@login_required
+@student_required
+def profile():
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        phone = request.form.get('phone', '').strip()
+        new_pw = request.form.get('new_password', '').strip()
+        confirm_pw = request.form.get('confirm_password', '').strip()
+
+        if not name:
+            flash('Name is required.', 'danger')
+            return render_template('student/profile.html')
+
+        current_user.name = name
+        current_user.phone = phone
+
+        if new_pw:
+            if len(new_pw) < 6:
+                flash('New password must be at least 6 characters.', 'danger')
+                return render_template('student/profile.html')
+            if new_pw != confirm_pw:
+                flash('Passwords do not match.', 'danger')
+                return render_template('student/profile.html')
+            current_user.set_password(new_pw)
+
+        db.session.commit()
+        flash('Profile updated successfully.', 'success')
+        return redirect(url_for('student.profile'))
+
+    return render_template('student/profile.html')
 

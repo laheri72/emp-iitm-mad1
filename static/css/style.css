@@ -142,3 +142,27 @@ body {
 
 /* utility */
 .emp-text-primary { color: var(--emp-primary) !important; }
+
+/* ── Print styles (Scorecard printing) ────────────────────────── */
+@media print {
+  .emp-navbar,
+  .emp-footer,
+  .btn,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+  .card {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+  }
+  .table {
+    border-color: #000 !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
